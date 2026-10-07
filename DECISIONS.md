@@ -33,6 +33,16 @@
 - Full-screen Windows 10/11 BSOD overlay (`#0078d7`, `:(`, 0-100% counter, and stop code `KERNEL_ROULETTE_FATAL`).
 - Camera pushes in, followed by "YOU SURVIVED" banner and "PLAY AGAIN" button.
 
+## Milestone 8: Polish
+- WebAudio synthesizers implemented in `audio.ts` without relying on external mp3/wav files: procedural gunshot impulse + lowpass filtering, empty cylinder clicks, spin ratchets, typewriter clickers, and glitch buzzes.
+- Session-only win/loss tracking kept purely in JS memory state across game reboots.
+- Dynamic camera reactions: subtle idle drift, pull push-ins, and multi-stage trauma shakes on hammer drops / death sequences.
+
+## Milestone 9: Deploy
+- Production build confirmed passing via Vite + tsc with zero errors.
+- Comprehensive Vercel static deployment documentation provided in `README.md`.
+
+
 
 
 
