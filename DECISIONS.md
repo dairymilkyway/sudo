@@ -18,5 +18,11 @@
 - Built `VirtualTerminal` in `src/terminal.ts` drawing on HTML Canvas backing a `THREE.CanvasTexture`.
 - Supports typewriter effect (`typeText`), line scrolling, scanline CRT raster effect, blinking cursor, and custom theme colors (`#33ff66` Linux prompt vs `#00a4ef` cmd prompt).
 
+## Milestone 5: Turns
+- Built `BotAI` in `src/bot.ts` with probability calculation `pullsSurvivedSinceSpin / 6` to choose SPIN vs PULL, thinking delays between 800ms and 1800ms, and Linux vs Windows themed trash talk lines.
+- Built interactive HUD with 6-dot chamber indicator, turn label, and PULL / SPIN buttons with automatic disable states.
+- Implemented turn cycling, revolver aiming, chamber cycling, and camera reactions on action.
+
+
 
 

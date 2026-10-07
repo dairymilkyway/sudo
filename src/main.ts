@@ -1,6 +1,7 @@
 import { createScene } from './scene';
-import { runBulletDistributionTest } from './game';
+import { runBulletDistributionTest, GameEngine, ActionType } from './game';
 import { VirtualTerminal } from './terminal';
+import { BotAI } from './bot';
 
 // Milestone 3: Run console test for 1000 games
 const testResult = runBulletDistributionTest(1000);
@@ -30,11 +31,133 @@ const botTerminal = new VirtualTerminal({
 sceneContext.setMonitorTextures(playerTerminal.getTexture(), botTerminal.getTexture());
 
 playerTerminal.addLine('Kernel Roulette v1.0.0 (tty1)');
-playerTerminal.addLine('System ready. Revolver loaded with 1 round.');
+playerTerminal.addLine('System ready. 6 chambers, 1 bullet.');
 
 botTerminal.addLine('Microsoft Windows [Version 10.0.19045.3803]');
 botTerminal.addLine('(c) Microsoft Corporation. All rights reserved.');
 botTerminal.addLine('WinDefend: Low probability threat detected.');
+
+// Milestone 5: Game loop, bot turns, and HUD wiring
+const engine = new GameEngine();
+const botAI = new BotAI();
+
+const btnPull = document.getElementById('btn-pull') as HTMLButtonElement;
+const btnSpin = document.getElementById('btn-spin') as HTMLButtonElement;
+const turnIndicator = document.getElementById('turn-indicator') as HTMLElement;
+const chamberSlots = document.querySelectorAll('.chamber-slots .slot');
+const scorePlayer = document.getElementById('score-player') as HTMLElement;
+const scoreBot = document.getElementById('score-bot') as HTMLElement;
+
+function updateHUD() {
+  const state = engine.getState();
+
+  // Update Scoreboard
+  scorePlayer.textContent = String(state.stats.playerWins);
+  scoreBot.textContent = String(state.stats.botWins);
+
+  // Update Turn Indicator
+  if (state.phase === 'player_turn') {
+    turnIndicator.innerHTML = 'CURRENT TURN: <span class="player-turn">PLAYER (LINUX)</span>';
+    btnPull.disabled = false;
+    btnSpin.disabled = false;
+  } else if (state.phase === 'bot_turn') {
+    turnIndicator.innerHTML = 'CURRENT TURN: <span class="bot-turn">BOT (WINDOWS)</span>';
+    btnPull.disabled = true;
+    btnSpin.disabled = true;
+  } else {
+    turnIndicator.innerHTML = 'CURRENT TURN: <span>RESOLVING...</span>';
+    btnPull.disabled = true;
+    btnSpin.disabled = true;
+  }
+
+  // Update Chamber Indicators
+  chamberSlots.forEach((slot, idx) => {
+    slot.classList.toggle('current', idx === state.currentChamber);
+    slot.classList.toggle('checked', state.chamberHistory[idx]);
+  });
+}
+
+async function handleAction(actor: 'player' | 'bot', action: ActionType) {
+  // Disable buttons while executing action
+  btnPull.disabled = true;
+  btnSpin.disabled = true;
+
+  const terminal = actor === 'player' ? playerTerminal : botTerminal;
+
+  if (action === 'spin') {
+    terminal.addLine(`[ACTION] Spinning chamber cylinder...`);
+    await sceneContext.spinRevolver();
+  }
+
+  // Aim revolver at the active actor
+  await sceneContext.aimRevolver(actor);
+  sceneContext.setCameraPush(0.5);
+
+  const result = engine.executeAction(action);
+
+  if (result.isBullet) {
+    terminal.addLine(`BANG! Bullet fired in chamber #${result.chamber + 1}!`);
+    sceneContext.setCameraShake(0.08);
+    updateHUD();
+
+    // Reset push after delay
+    setTimeout(() => {
+      sceneContext.setCameraPush(0);
+      sceneContext.aimRevolver('center');
+    }, 1200);
+
+    // Trigger OS Death sequence in Milestone 6 & 7
+    console.log(`${actor.toUpperCase()} HIT THE BULLET AND DIED!`);
+  } else {
+    // Click: empty chamber survived
+    terminal.addLine(`*click* (Chamber #${result.chamber + 1} empty).`);
+    sceneContext.setCameraShake(0.015);
+    updateHUD();
+
+    await new Promise(r => setTimeout(r, 600));
+    sceneContext.setCameraPush(0);
+    await sceneContext.aimRevolver('center');
+
+    // If next is bot, trigger bot turn
+    if (engine.getState().phase === 'bot_turn') {
+      runBotTurn();
+    }
+  }
+}
+
+async function runBotTurn() {
+  updateHUD();
+  const state = engine.getState();
+  const decision = botAI.decide(state.pullsSurvivedSinceSpin);
+
+  // Fake bot thinking delay
+  await new Promise(r => setTimeout(r, decision.delayMs));
+
+  // Bot prints reasoning lines
+  botTerminal.addLine(decision.reasoning);
+
+  // Optional bot trash talk
+  if (decision.trashTalk) {
+    botTerminal.addLine(`"${decision.trashTalk}"`);
+  }
+
+  await new Promise(r => setTimeout(r, 500));
+  await handleAction('bot', decision.action);
+}
+
+btnPull.addEventListener('click', () => {
+  if (engine.getState().phase === 'player_turn') {
+    handleAction('player', 'pull');
+  }
+});
+
+btnSpin.addEventListener('click', () => {
+  if (engine.getState().phase === 'player_turn') {
+    handleAction('player', 'spin');
+  }
+});
+
+updateHUD();
 
 function animate(time: number) {
   requestAnimationFrame(animate);
@@ -44,4 +167,5 @@ function animate(time: number) {
 }
 
 requestAnimationFrame(animate);
+
 
