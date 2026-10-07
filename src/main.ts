@@ -2,6 +2,8 @@ import { createScene } from './scene';
 import { runBulletDistributionTest, GameEngine, ActionType } from './game';
 import { VirtualTerminal } from './terminal';
 import { BotAI } from './bot';
+import { SoundFX } from './audio';
+import { DeathManager } from './death';
 
 // Milestone 3: Run console test for 1000 games
 const testResult = runBulletDistributionTest(1000);
@@ -12,8 +14,9 @@ console.log('Is roughly uniform (within tolerance)?', testResult.isUniform);
 
 const app = document.getElementById('app')!;
 const sceneContext = createScene(app);
+const soundFX = new SoundFX();
 
-// Milestone 4: Setup Terminals
+// Setup Terminals
 const playerTerminal = new VirtualTerminal({
   bgColor: '#061308',
   textColor: '#33ff66',
@@ -30,14 +33,20 @@ const botTerminal = new VirtualTerminal({
 
 sceneContext.setMonitorTextures(playerTerminal.getTexture(), botTerminal.getTexture());
 
-playerTerminal.addLine('Kernel Roulette v1.0.0 (tty1)');
-playerTerminal.addLine('System ready. 6 chambers, 1 bullet.');
+function initTerminals() {
+  playerTerminal.clear();
+  playerTerminal.addLine('Kernel Roulette v1.0.0 (tty1)');
+  playerTerminal.addLine('System ready. 6 chambers, 1 bullet.');
 
-botTerminal.addLine('Microsoft Windows [Version 10.0.19045.3803]');
-botTerminal.addLine('(c) Microsoft Corporation. All rights reserved.');
-botTerminal.addLine('WinDefend: Low probability threat detected.');
+  botTerminal.clear();
+  botTerminal.addLine('Microsoft Windows [Version 10.0.19045.3803]');
+  botTerminal.addLine('(c) Microsoft Corporation. All rights reserved.');
+  botTerminal.addLine('WinDefend: Low probability threat detected.');
+}
 
-// Milestone 5: Game loop, bot turns, and HUD wiring
+initTerminals();
+
+// Game loop, bot AI, and HUD wiring
 const engine = new GameEngine();
 const botAI = new BotAI();
 
@@ -47,6 +56,21 @@ const turnIndicator = document.getElementById('turn-indicator') as HTMLElement;
 const chamberSlots = document.querySelectorAll('.chamber-slots .slot');
 const scorePlayer = document.getElementById('score-player') as HTMLElement;
 const scoreBot = document.getElementById('score-bot') as HTMLElement;
+
+function resetGame() {
+  engine.reset(true); // keep scores in memory
+  initTerminals();
+  updateHUD();
+}
+
+const deathManager = new DeathManager({
+  container: app,
+  playerTerminal,
+  botTerminal,
+  soundFX,
+  setCameraShake: (intensity) => sceneContext.setCameraShake(intensity),
+  onRestart: resetGame
+});
 
 function updateHUD() {
   const state = engine.getState();
@@ -78,7 +102,6 @@ function updateHUD() {
 }
 
 async function handleAction(actor: 'player' | 'bot', action: ActionType) {
-  // Disable buttons while executing action
   btnPull.disabled = true;
   btnSpin.disabled = true;
 
@@ -86,6 +109,7 @@ async function handleAction(actor: 'player' | 'bot', action: ActionType) {
 
   if (action === 'spin') {
     terminal.addLine(`[ACTION] Spinning chamber cylinder...`);
+    soundFX.playSpin();
     await sceneContext.spinRevolver();
   }
 
@@ -97,19 +121,23 @@ async function handleAction(actor: 'player' | 'bot', action: ActionType) {
 
   if (result.isBullet) {
     terminal.addLine(`BANG! Bullet fired in chamber #${result.chamber + 1}!`);
-    sceneContext.setCameraShake(0.08);
+    sceneContext.setCameraShake(0.1);
     updateHUD();
 
-    // Reset push after delay
     setTimeout(() => {
       sceneContext.setCameraPush(0);
       sceneContext.aimRevolver('center');
     }, 1200);
 
-    // Trigger OS Death sequence in Milestone 6 & 7
-    console.log(`${actor.toUpperCase()} HIT THE BULLET AND DIED!`);
+    // Trigger OS Death sequence
+    if (actor === 'player') {
+      await deathManager.triggerLinuxDeath();
+    } else {
+      await deathManager.triggerWindowsDeath();
+    }
   } else {
     // Click: empty chamber survived
+    soundFX.playEmptyClick();
     terminal.addLine(`*click* (Chamber #${result.chamber + 1} empty).`);
     sceneContext.setCameraShake(0.015);
     updateHUD();
@@ -158,6 +186,7 @@ btnSpin.addEventListener('click', () => {
 });
 
 updateHUD();
+
 
 function animate(time: number) {
   requestAnimationFrame(animate);

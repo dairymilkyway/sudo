@@ -23,6 +23,17 @@
 - Built interactive HUD with 6-dot chamber indicator, turn label, and PULL / SPIN buttons with automatic disable states.
 - Implemented turn cycling, revolver aiming, chamber cycling, and camera reactions on action.
 
+## Milestone 6: Linux Death
+- Terminal executes `$ sudo rm -rf /*`, prints password prompt with dots, and simulates disintegration of desktop icons, wallpaper, and file deletion scrolls with camera shake and crackle.
+- Hard cut to black screen with realistic `Kernel panic - not syncing: Attempted to kill init! exitcode=0x00000009` and call trace.
+- Drops to `grub rescue>` after 3s where typing `reboot` (or clicking the clickable hint) restarts the match seamlessly while retaining session wins.
+
+## Milestone 7: Windows Death
+- Bot terminal executes `del /f /s /q C:\*` with rapid deletion of System32 core executables and drivers.
+- Full-screen Windows 10/11 BSOD overlay (`#0078d7`, `:(`, 0-100% counter, and stop code `KERNEL_ROULETTE_FATAL`).
+- Camera pushes in, followed by "YOU SURVIVED" banner and "PLAY AGAIN" button.
+
+
 
 
 
