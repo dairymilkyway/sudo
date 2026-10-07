@@ -6,6 +6,7 @@ export interface SceneContext {
   renderer: THREE.WebGLRenderer;
   playerMonitorMesh: THREE.Mesh;
   botMonitorMesh: THREE.Mesh;
+  setMonitorTextures: (playerTex: THREE.Texture, botTex: THREE.Texture) => void;
   revolverGroup: THREE.Group;
   cylinderMesh: THREE.Mesh;
   update: (time: number) => void;
@@ -351,12 +352,18 @@ export function createScene(container: HTMLElement): SceneContext {
     renderer.setSize(window.innerWidth, window.innerHeight);
   });
 
+  function setMonitorTextures(playerTex: THREE.Texture, botTex: THREE.Texture) {
+    playerCRT.screen.material = new THREE.MeshBasicMaterial({ map: playerTex });
+    botCRT.screen.material = new THREE.MeshBasicMaterial({ map: botTex });
+  }
+
   return {
     scene,
     camera,
     renderer,
     playerMonitorMesh: playerCRT.screen,
     botMonitorMesh: botCRT.screen,
+    setMonitorTextures,
     revolverGroup,
     cylinderMesh,
     update,

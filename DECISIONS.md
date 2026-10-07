@@ -14,4 +14,9 @@
 - Handles turn passing, random bullet slot allocation, cyclic chamber advancement, chamber history, and spin logic.
 - Included `runBulletDistributionTest(1000)` test function verified via tsx with ~16.6% per chamber slot within tolerance.
 
+## Milestone 4: Terminals
+- Built `VirtualTerminal` in `src/terminal.ts` drawing on HTML Canvas backing a `THREE.CanvasTexture`.
+- Supports typewriter effect (`typeText`), line scrolling, scanline CRT raster effect, blinking cursor, and custom theme colors (`#33ff66` Linux prompt vs `#00a4ef` cmd prompt).
+
+
 
