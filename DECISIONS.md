@@ -9,3 +9,9 @@
 - Built low-poly revolver (frame, cylinder, barrel, grip) with spin animation and aiming lerp.
 - Implemented camera sway, push-in, and shake decay in `scene.ts`.
 
+## Milestone 3: Logic
+- Built pure `game.ts` state machine with zero DOM or Three.js dependencies.
+- Handles turn passing, random bullet slot allocation, cyclic chamber advancement, chamber history, and spin logic.
+- Included `runBulletDistributionTest(1000)` test function verified via tsx with ~16.6% per chamber slot within tolerance.
+
+
