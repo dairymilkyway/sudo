@@ -53,6 +53,15 @@
 - Tuned camera framing and lowered background fog density so the opponent, revolver, and both monitors are crisp and clearly visible.
 - Added dynamic defeat animation: opponent slumps and eyes shut on Windows death, resetting cleanly on restart.
 
+## Enhancement: Widescreen Monitors & Peripherals per Person
+- Upgraded monitors to widescreen displays with ultra-slim bezels covering ~95% of the front face ("more screen") with 16:10 aspect ratio (0.77m x 0.49m) and dedicated power LED indicators.
+- Upgraded VirtualTerminal resolution to 768x480 with 22px monospace typography for maximum screen area and crisp readability.
+- Added full peripheral sets for both players:
+  - Mechanical keyboard with individual 3D beveled keycaps, spacebar, Enter key, and OS Super keys (Arch Linux Tux icon for player, Windows flag icon for bot), featuring theme-matched RGB underglow (green for Linux, blue for Windows).
+  - Stitched gaming mousepad with theme edge stitching.
+  - Ergonomic gaming mouse with scroll wheel and glowing RGB LED strip.
+- Positioned the bot's hands and arms so their right hand rests naturally on their mouse and their left hand rests on their keyboard.
+
 
 
 

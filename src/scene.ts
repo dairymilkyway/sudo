@@ -137,48 +137,218 @@ export function createScene(container: HTMLElement): SceneContext {
   winGroup.position.set(0.35, 0.941, -1.05);
   scene.add(winGroup);
 
-  // Helper to create CRT Monitor
-  function createCRTMonitor(colorTheme: number): { casing: THREE.Group; screen: THREE.Mesh } {
+  // Helper to create sleek monitor with maximized screen real estate ("more screen")
+  function createWidescreenMonitor(colorTheme: number): { casing: THREE.Group; screen: THREE.Mesh } {
     const monitorGroup = new THREE.Group();
-    const caseMat = new THREE.MeshStandardMaterial({ color: 0xd8d2c2, roughness: 0.6 }); // vintage beige CRT
-    const caseBackMat = new THREE.MeshStandardMaterial({ color: 0x8a8475, roughness: 0.8 });
+    const caseMat = new THREE.MeshStandardMaterial({ color: 0x141820, roughness: 0.5, metalness: 0.3 });
+    const caseBackMat = new THREE.MeshStandardMaterial({ color: 0x0d1016, roughness: 0.7, metalness: 0.2 });
 
-    // Base & Stand
-    const stand = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.04, 0.3), caseMat);
-    stand.position.y = 0.02;
-    const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.08, 0.08, 12), caseMat);
-    neck.position.y = 0.08;
+    // Sleek stand base
+    const stand = new THREE.Mesh(new THREE.BoxGeometry(0.32, 0.02, 0.22), caseMat);
+    stand.position.y = 0.01;
+    const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.032, 0.038, 0.16, 12), caseMat);
+    neck.position.set(0, 0.09, -0.04);
     monitorGroup.add(stand, neck);
 
-    // CRT Housing
-    const frontBezel = new THREE.Mesh(new THREE.BoxGeometry(0.68, 0.52, 0.12), caseMat);
+    // Slim-bezel Monitor Housing (width 0.80, height 0.52, depth 0.035)
+    const frontBezel = new THREE.Mesh(new THREE.BoxGeometry(0.80, 0.52, 0.035), caseMat);
     frontBezel.position.set(0, 0.36, 0);
-    const crtBack = new THREE.Mesh(new THREE.BoxGeometry(0.56, 0.44, 0.38), caseBackMat);
-    crtBack.position.set(0, 0.36, -0.2);
-    monitorGroup.add(frontBezel, crtBack);
+    const backHousing = new THREE.Mesh(new THREE.BoxGeometry(0.72, 0.44, 0.12), caseBackMat);
+    backHousing.position.set(0, 0.36, -0.07);
+    monitorGroup.add(frontBezel, backHousing);
 
-    // Screen Mesh (slightly curved look via cylinder or plane)
-    const screenGeo = new THREE.PlaneGeometry(0.52, 0.38);
+    // Huge Screen Mesh (0.77 x 0.49) covering ~95% of front face ("more screen")
+    const screenGeo = new THREE.PlaneGeometry(0.77, 0.49);
     const screenMat = new THREE.MeshBasicMaterial({ color: colorTheme });
     const screen = new THREE.Mesh(screenGeo, screenMat);
-    screen.position.set(0, 0.36, 0.061);
+    screen.position.set(0, 0.36, 0.018);
     monitorGroup.add(screen);
+
+    // Subtle power indicator LED at bottom right
+    const ledMat = new THREE.MeshBasicMaterial({ color: colorTheme === 0x0a1a0d ? 0x33ff66 : 0x00a4ef });
+    const powerLed = new THREE.Mesh(new THREE.BoxGeometry(0.012, 0.004, 0.002), ledMat);
+    powerLed.position.set(0.37, 0.11, 0.018);
+    monitorGroup.add(powerLed);
 
     return { casing: monitorGroup, screen };
   }
 
-  // Player Monitor (near side, offset to left so desk and opponent are visible)
-  const playerCRT = createCRTMonitor(0x0a1a0d);
-  playerCRT.casing.position.set(-0.56, 0.94, 0.48);
-  playerCRT.casing.rotation.y = 0.32;
-  playerCRT.casing.rotation.x = -0.05;
+  // Player Monitor (near side, offset to left so desk, opponent, and revolver are visible)
+  const playerCRT = createWidescreenMonitor(0x0a1a0d);
+  playerCRT.casing.position.set(-0.58, 0.94, 0.45);
+  playerCRT.casing.rotation.y = 0.36;
+  playerCRT.casing.rotation.x = -0.04;
   scene.add(playerCRT.casing);
 
   // Bot Monitor (far side, offset to right)
-  const botCRT = createCRTMonitor(0x081320);
-  botCRT.casing.position.set(0.60, 0.94, -0.95);
+  const botCRT = createWidescreenMonitor(0x081320);
+  botCRT.casing.position.set(0.62, 0.94, -0.95);
   botCRT.casing.rotation.y = Math.PI - 0.36;
   scene.add(botCRT.casing);
+
+  // --- Keyboard & Mouse per Person ---
+  function createPeripheralSet(isBot: boolean, themeColor: string) {
+    const group = new THREE.Group();
+
+    // 1. Keyboard Canvas Texture (512x256)
+    const kbCanvas = document.createElement('canvas');
+    kbCanvas.width = 512;
+    kbCanvas.height = 256;
+    const kCtx = kbCanvas.getContext('2d')!;
+
+    // Chassis
+    kCtx.fillStyle = '#11141c';
+    kCtx.fillRect(0, 0, 512, 256);
+
+    // Keybed RGB underglow
+    kCtx.fillStyle = themeColor;
+    kCtx.globalAlpha = 0.28;
+    kCtx.fillRect(16, 16, 480, 224);
+    kCtx.globalAlpha = 1.0;
+
+    // Draw mechanical keycap rows
+    const rowCount = 5;
+    const colCount = 14;
+    const startX = 22;
+    const startY = 22;
+    const keyW = 28;
+    const keyH = 34;
+    const gap = 5;
+
+    for (let r = 0; r < rowCount; r++) {
+      for (let c = 0; c < colCount; c++) {
+        const kx = startX + c * (keyW + gap);
+        const ky = startY + r * (keyH + gap);
+
+        // Skip spacebar slot
+        if (r === 4 && c >= 4 && c <= 8) continue;
+
+        // Keycap base
+        kCtx.fillStyle = '#1e2430';
+        kCtx.fillRect(kx, ky, keyW, keyH);
+
+        // Keycap top bevel
+        kCtx.fillStyle = '#293140';
+        kCtx.fillRect(kx + 2, ky + 2, keyW - 4, keyH - 4);
+      }
+    }
+
+    // Spacebar
+    const sbX = startX + 4 * (keyW + gap);
+    const sbY = startY + 4 * (keyH + gap);
+    const sbW = 5 * (keyW + gap) - gap;
+    kCtx.fillStyle = '#1e2430';
+    kCtx.fillRect(sbX, sbY, sbW, keyH);
+    kCtx.fillStyle = '#293140';
+    kCtx.fillRect(sbX + 2, sbY + 2, sbW - 4, keyH - 4);
+
+    // Enter key with theme color accent
+    const enterX = startX + 12 * (keyW + gap);
+    const enterY = startY + 2 * (keyH + gap);
+    const enterW = keyW * 2 + gap;
+    kCtx.fillStyle = themeColor;
+    kCtx.fillRect(enterX, enterY, enterW, keyH);
+
+    // OS Super Key (bottom-left)
+    const osKeyX = startX + 2 * (keyW + gap);
+    const osKeyY = startY + 4 * (keyH + gap);
+    if (isBot) {
+      // Windows 4-pane icon
+      kCtx.fillStyle = '#00a4ef';
+      const pw = 5;
+      kCtx.fillRect(osKeyX + 8, osKeyY + 11, pw, pw);
+      kCtx.fillRect(osKeyX + 15, osKeyY + 11, pw, pw);
+      kCtx.fillRect(osKeyX + 8, osKeyY + 18, pw, pw);
+      kCtx.fillRect(osKeyX + 15, osKeyY + 18, pw, pw);
+    } else {
+      // Linux Tux icon
+      kCtx.fillStyle = '#33ff66';
+      kCtx.beginPath();
+      kCtx.arc(osKeyX + 14, osKeyY + 17, 6, 0, Math.PI * 2);
+      kCtx.fill();
+    }
+
+    const kbTexture = new THREE.CanvasTexture(kbCanvas);
+
+    // Keyboard 3D Mesh
+    const kbGeo = new THREE.BoxGeometry(0.38, 0.02, 0.15);
+    const kbMat = [
+      new THREE.MeshStandardMaterial({ color: 0x181c24, roughness: 0.8 }),
+      new THREE.MeshStandardMaterial({ color: 0x181c24, roughness: 0.8 }),
+      new THREE.MeshStandardMaterial({ map: kbTexture, roughness: 0.55 }), // Top face with keycaps
+      new THREE.MeshStandardMaterial({ color: 0x10131a, roughness: 0.9 }),
+      new THREE.MeshStandardMaterial({ color: 0x181c24, roughness: 0.8 }),
+      new THREE.MeshStandardMaterial({ color: 0x181c24, roughness: 0.8 })
+    ];
+    const keyboardMesh = new THREE.Mesh(kbGeo, kbMat);
+    keyboardMesh.castShadow = true;
+    keyboardMesh.receiveShadow = true;
+    group.add(keyboardMesh);
+
+    // 2. Mousepad
+    const padCanvas = document.createElement('canvas');
+    padCanvas.width = 256;
+    padCanvas.height = 256;
+    const pCtx = padCanvas.getContext('2d')!;
+    pCtx.fillStyle = '#0d1016';
+    pCtx.fillRect(0, 0, 256, 256);
+    // Stitched edge
+    pCtx.strokeStyle = themeColor;
+    pCtx.lineWidth = 10;
+    pCtx.strokeRect(5, 5, 246, 246);
+    const padTexture = new THREE.CanvasTexture(padCanvas);
+
+    const mousepad = new THREE.Mesh(
+      new THREE.BoxGeometry(0.20, 0.003, 0.22),
+      new THREE.MeshStandardMaterial({ map: padTexture, roughness: 0.85 })
+    );
+    mousepad.position.set(0.26, -0.008, 0);
+    mousepad.receiveShadow = true;
+    group.add(mousepad);
+
+    // 3. Ergonomic Gaming Mouse
+    const mouseGroup = new THREE.Group();
+    mouseGroup.position.set(0.26, 0.008, 0);
+
+    const mouseBody = new THREE.Mesh(
+      new THREE.BoxGeometry(0.062, 0.024, 0.105),
+      new THREE.MeshStandardMaterial({ color: 0x151922, roughness: 0.45, metalness: 0.25 })
+    );
+    mouseBody.castShadow = true;
+    mouseGroup.add(mouseBody);
+
+    // Scroll wheel
+    const wheel = new THREE.Mesh(
+      new THREE.BoxGeometry(0.01, 0.012, 0.024),
+      new THREE.MeshStandardMaterial({ color: 0x080a0f, roughness: 0.9 })
+    );
+    wheel.position.set(0, 0.013, -0.022);
+    mouseGroup.add(wheel);
+
+    // Glowing RGB strip
+    const glowStrip = new THREE.Mesh(
+      new THREE.BoxGeometry(0.045, 0.004, 0.008),
+      new THREE.MeshBasicMaterial({ color: themeColor === '#33ff66' ? 0x33ff66 : 0x00a4ef })
+    );
+    glowStrip.position.set(0, 0.013, 0.025);
+    mouseGroup.add(glowStrip);
+
+    group.add(mouseGroup);
+
+    return group;
+  }
+
+  // Player Keyboard & Mouse Set (near side)
+  const playerPeripherals = createPeripheralSet(false, '#33ff66');
+  playerPeripherals.position.set(-0.16, 0.951, 0.48);
+  playerPeripherals.rotation.y = 0.08;
+  scene.add(playerPeripherals);
+
+  // Bot Keyboard & Mouse Set (far side, facing opponent)
+  const botPeripherals = createPeripheralSet(true, '#00a4ef');
+  botPeripherals.position.set(0.06, 0.951, -0.72);
+  botPeripherals.rotation.y = Math.PI - 0.12;
+  scene.add(botPeripherals);
 
   // --- Procedural Canvas Textures for Opponent ---
   function createOpponentTextures() {
@@ -568,30 +738,26 @@ export function createScene(container: HTMLElement): SceneContext {
 
   botOpponentGroup.add(headGroup);
 
-  // Arms in suit fabric
+  // Arms in suit fabric draped towards keyboard and mouse
   const leftUpperArm = new THREE.Mesh(new THREE.BoxGeometry(0.13, 0.36, 0.14), suitMat);
-  leftUpperArm.position.set(-0.32, 0.42, 0.05);
-  leftUpperArm.rotation.x = 0.55;
-  leftUpperArm.rotation.z = -0.1;
+  leftUpperArm.position.set(0.30, 0.42, 0.05);
+  leftUpperArm.rotation.set(0.65, -0.15, 0.1);
 
   const rightUpperArm = new THREE.Mesh(new THREE.BoxGeometry(0.13, 0.36, 0.14), suitMat);
-  rightUpperArm.position.set(0.32, 0.42, 0.05);
-  rightUpperArm.rotation.x = 0.55;
-  rightUpperArm.rotation.z = 0.1;
+  rightUpperArm.position.set(-0.30, 0.42, 0.05);
+  rightUpperArm.rotation.set(0.65, 0.15, -0.1);
 
-  const leftForearm = new THREE.Mesh(new THREE.BoxGeometry(0.11, 0.36, 0.12), suitMat);
-  leftForearm.position.set(-0.34, 0.16, 0.32);
-  leftForearm.rotation.x = 1.25;
-  leftForearm.rotation.z = -0.05;
+  const leftForearm = new THREE.Mesh(new THREE.BoxGeometry(0.11, 0.38, 0.12), suitMat);
+  leftForearm.position.set(0.18, 0.18, 0.44);
+  leftForearm.rotation.set(1.30, -0.22, 0);
 
-  const rightForearm = new THREE.Mesh(new THREE.BoxGeometry(0.11, 0.36, 0.12), suitMat);
-  rightForearm.position.set(0.34, 0.16, 0.32);
-  rightForearm.rotation.x = 1.25;
-  rightForearm.rotation.z = 0.05;
+  const rightForearm = new THREE.Mesh(new THREE.BoxGeometry(0.11, 0.38, 0.12), suitMat);
+  rightForearm.position.set(-0.24, 0.18, 0.44);
+  rightForearm.rotation.set(1.30, 0.12, 0);
 
   botOpponentGroup.add(leftUpperArm, rightUpperArm, leftForearm, rightForearm);
 
-  // Hands resting on desk
+  // Hands resting on keyboard (left hand) and mouse (right hand)
   const handMaterials = [
     skinMat,
     skinMat,
@@ -601,9 +767,12 @@ export function createScene(container: HTMLElement): SceneContext {
     skinMat
   ];
   const leftHand = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.04, 0.16), handMaterials);
-  leftHand.position.set(-0.32, 0.05, 0.55);
+  leftHand.position.set(0.08, 0.065, 0.72);
+  leftHand.rotation.y = -0.12;
+
   const rightHand = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.04, 0.16), handMaterials);
-  rightHand.position.set(0.32, 0.05, 0.55);
+  rightHand.position.set(-0.20, 0.065, 0.72);
+  rightHand.rotation.y = 0.08;
   botOpponentGroup.add(leftHand, rightHand);
 
   // High-backed Executive Office Chair

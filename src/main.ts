@@ -17,19 +17,23 @@ const app = document.getElementById('app')!;
 const sceneContext = createScene(app);
 const soundFX = new SoundFX();
 
-// Setup Terminals
+// Setup Widescreen Terminals
 const playerTerminal = new VirtualTerminal({
+  width: 768,
+  height: 480,
   bgColor: '#061308',
   textColor: '#33ff66',
   promptPrefix: 'player@archlinux:~$ ',
-  fontSize: 20
+  fontSize: 22
 });
 
 const botTerminal = new VirtualTerminal({
+  width: 768,
+  height: 480,
   bgColor: '#06111e',
   textColor: '#00a4ef',
   promptPrefix: 'C:\\Users\\Administrator> ',
-  fontSize: 20
+  fontSize: 22
 });
 
 sceneContext.setMonitorTextures(playerTerminal.getTexture(), botTerminal.getTexture());
