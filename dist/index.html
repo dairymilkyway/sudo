@@ -4,10 +4,34 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Kernel Roulette</title>
-    <script type="module" crossorigin src="/assets/index-BbWDDtuJ.js"></script>
-    <link rel="stylesheet" crossorigin href="/assets/index-N204EVL1.css">
+    <script type="module" crossorigin src="/assets/index-DkolEBHZ.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-7bS0C-R6.css">
   </head>
   <body>
-    <div id="app"></div>
+    <div id="app">
+      <div class="crt-overlay"></div>
+      <div id="scoreboard">
+        <span>SESSION RECORD</span>
+        <span>LINUX: <strong id="score-player" class="p-score">0</strong></span>
+        <span>WINDOWS: <strong id="score-bot" class="b-score">0</strong></span>
+      </div>
+      <div id="hud">
+        <div class="turn-indicator" id="turn-indicator">
+          CURRENT TURN: <span class="player-turn">PLAYER (LINUX)</span>
+        </div>
+        <div class="chamber-slots" id="chamber-slots">
+          <div class="slot current" data-index="0"></div>
+          <div class="slot" data-index="1"></div>
+          <div class="slot" data-index="2"></div>
+          <div class="slot" data-index="3"></div>
+          <div class="slot" data-index="4"></div>
+          <div class="slot" data-index="5"></div>
+        </div>
+        <div class="hud-actions">
+          <button id="btn-pull" class="btn-action">PULL</button>
+          <button id="btn-spin" class="btn-action">SPIN & PULL</button>
+        </div>
+      </div>
+    </div>
   </body>
 </html>

@@ -42,6 +42,19 @@
 - Production build confirmed passing via Vite + tsc with zero errors.
 - Comprehensive Vercel static deployment documentation provided in `README.md`.
 
+## Enhancement: 3D Opponent Model & Normal Textures
+- Implemented high-resolution procedural canvas textures for the opponent:
+  - Natural human face texture with warm skin tones, shaded contours, 5 o'clock shadow, defined eyebrows, and piercing Windows blue eyes.
+  - Organic animated eye blinking every 3.8s and subtle breathing chest/head movements.
+  - Detailed corporate suit texture with woven fabric pattern, white collared shirt, Windows blue necktie, lapel stitching, and authentic Windows 4-pane logo enamel lapel pin.
+  - Realistic hands with skin texture, fingernails, and suit/shirt cuffs resting naturally on the desk.
+  - High-backed executive office chair with padded leather texture.
+- Added dedicated 3-point lighting for the opponent: warm overhead key spotlight (`0xfff6ea`), cool Windows blue rim light (`0x0078d7`), and soft front fill light.
+- Tuned camera framing and lowered background fog density so the opponent, revolver, and both monitors are crisp and clearly visible.
+- Added dynamic defeat animation: opponent slumps and eyes shut on Windows death, resetting cleanly on restart.
+
+
+
 
 
 

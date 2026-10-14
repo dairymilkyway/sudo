@@ -4,6 +4,7 @@ import { VirtualTerminal } from './terminal';
 import { BotAI } from './bot';
 import { SoundFX } from './audio';
 import { DeathManager } from './death';
+import './style.css';
 
 // Milestone 3: Run console test for 1000 games
 const testResult = runBulletDistributionTest(1000);
@@ -60,6 +61,7 @@ const scoreBot = document.getElementById('score-bot') as HTMLElement;
 function resetGame() {
   engine.reset(true); // keep scores in memory
   initTerminals();
+  sceneContext.setOpponentDefeated(false);
   updateHUD();
 }
 
@@ -121,8 +123,11 @@ async function handleAction(actor: 'player' | 'bot', action: ActionType) {
 
   if (result.isBullet) {
     terminal.addLine(`BANG! Bullet fired in chamber #${result.chamber + 1}!`);
-    sceneContext.setCameraShake(0.1);
+    sceneContext.setCameraShake(0.12);
     updateHUD();
+
+    // Trigger visual muzzle flash & weapon recoil kick
+    await sceneContext.fireRecoil();
 
     setTimeout(() => {
       sceneContext.setCameraPush(0);
@@ -133,13 +138,15 @@ async function handleAction(actor: 'player' | 'bot', action: ActionType) {
     if (actor === 'player') {
       await deathManager.triggerLinuxDeath();
     } else {
+      sceneContext.setOpponentDefeated(true);
       await deathManager.triggerWindowsDeath();
     }
   } else {
     // Click: empty chamber survived
     soundFX.playEmptyClick();
+    await sceneContext.clickHammer();
     terminal.addLine(`*click* (Chamber #${result.chamber + 1} empty).`);
-    sceneContext.setCameraShake(0.015);
+    sceneContext.setCameraShake(0.02);
     updateHUD();
 
     await new Promise(r => setTimeout(r, 600));
