@@ -979,80 +979,235 @@ export function createScene(container: HTMLElement): SceneContext {
 
   scene.add(revolverGroup);
 
-  // --- FIRST-PERSON PLAYER ARM & HAND (POV) ---
-  const playerArmGroup = new THREE.Group();
+  // --- PROCEDURAL PLAYER HAND & HOODIE TEXTURES ---
+  const pSkinCanvas = document.createElement('canvas');
+  pSkinCanvas.width = 256;
+  pSkinCanvas.height = 256;
+  const psCtx = pSkinCanvas.getContext('2d')!;
+  psCtx.fillStyle = '#d99772';
+  psCtx.fillRect(0, 0, 256, 256);
+  // Knuckle creases & natural shading
+  psCtx.strokeStyle = 'rgba(140, 70, 40, 0.45)';
+  psCtx.lineWidth = 3;
+  [45, 95, 145, 195].forEach(x => {
+    psCtx.beginPath();
+    psCtx.moveTo(x, 10);
+    psCtx.lineTo(x, 160);
+    psCtx.stroke();
+    // Fingernails with natural luster
+    psCtx.fillStyle = '#edd5c5';
+    psCtx.beginPath();
+    psCtx.ellipse(x + 10, 24, 7, 10, 0, 0, Math.PI * 2);
+    psCtx.fill();
+  });
+  const pSkinTexture = new THREE.CanvasTexture(pSkinCanvas);
+  const pSkinMat = new THREE.MeshStandardMaterial({
+    map: pSkinTexture,
+    roughness: 0.58,
+    metalness: 0.05
+  });
 
-  const sleeveMat = new THREE.MeshStandardMaterial({
-    color: 0x1b2028,
-    roughness: 0.9,
+  const pHoodieCanvas = document.createElement('canvas');
+  pHoodieCanvas.width = 256;
+  pHoodieCanvas.height = 256;
+  const phCtx = pHoodieCanvas.getContext('2d')!;
+  phCtx.fillStyle = '#1c2028';
+  phCtx.fillRect(0, 0, 256, 256);
+  // Weave grid texture
+  phCtx.strokeStyle = 'rgba(255, 255, 255, 0.04)';
+  phCtx.lineWidth = 2;
+  for (let i = 0; i < 256; i += 8) {
+    phCtx.beginPath();
+    phCtx.moveTo(i, 0);
+    phCtx.lineTo(i, 256);
+    phCtx.stroke();
+    phCtx.beginPath();
+    phCtx.moveTo(0, i);
+    phCtx.lineTo(256, i);
+    phCtx.stroke();
+  }
+  // Green seam stitching
+  phCtx.strokeStyle = '#2b3e32';
+  phCtx.lineWidth = 4;
+  phCtx.beginPath();
+  phCtx.moveTo(30, 0);
+  phCtx.lineTo(30, 256);
+  phCtx.stroke();
+  const pHoodieTexture = new THREE.CanvasTexture(pHoodieCanvas);
+  const pHoodieMat = new THREE.MeshStandardMaterial({
+    map: pHoodieTexture,
+    roughness: 0.88,
     metalness: 0.1
   });
-  const playerForearm = new THREE.Mesh(new THREE.CylinderGeometry(0.038, 0.048, 0.36, 16), sleeveMat);
+
+  // --- FIRST-PERSON PLAYER ARTICULATED SKELETAL RIG ---
+  const playerArmRig = new THREE.Group();
+
+  // Forearm group (pivots around elbow/anchor)
+  const playerForearmGroup = new THREE.Group();
+  playerArmRig.add(playerForearmGroup);
+
+  // Forearm hoodie sleeve
+  const playerForearm = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.038, 0.048, 0.36, 16),
+    pHoodieMat
+  );
   playerForearm.rotation.x = Math.PI * 0.42;
   playerForearm.rotation.y = -0.15;
   playerForearm.position.set(0.06, 0.02, -0.16);
   playerForearm.castShadow = true;
-  playerArmGroup.add(playerForearm);
+  playerForearmGroup.add(playerForearm);
 
-  const sleeveCuff = new THREE.Mesh(
-    new THREE.TorusGeometry(0.042, 0.008, 8, 16),
+  // Ribbed cuff at wrist
+  const playerCuff = new THREE.Mesh(
+    new THREE.TorusGeometry(0.042, 0.009, 8, 16),
     new THREE.MeshStandardMaterial({ color: 0x11151a, roughness: 0.95 })
   );
-  sleeveCuff.rotation.x = Math.PI * 0.42;
-  sleeveCuff.position.set(0.04, 0.08, -0.01);
-  playerArmGroup.add(sleeveCuff);
+  playerCuff.rotation.x = Math.PI * 0.42;
+  playerCuff.position.set(0.04, 0.08, -0.01);
+  playerForearmGroup.add(playerCuff);
 
-  const playerSkinMat = new THREE.MeshStandardMaterial({
-    color: 0xd69975,
-    roughness: 0.62,
-    metalness: 0.08
-  });
+  // Wrist Pivot Group (allows wrist flexion, extension, pitch, yaw)
+  const playerWristGroup = new THREE.Group();
+  playerWristGroup.position.set(0.02, 0.10, 0.02);
+  playerForearmGroup.add(playerWristGroup);
 
-  const playerPalm = new THREE.Mesh(new THREE.BoxGeometry(0.072, 0.022, 0.078), playerSkinMat);
-  playerPalm.position.set(0.02, 0.12, 0.06);
-  playerPalm.rotation.x = 0.2;
+  // Anatomical Palm
+  const playerPalm = new THREE.Mesh(new THREE.BoxGeometry(0.076, 0.024, 0.084), pSkinMat);
+  playerPalm.position.set(0, 0, 0.042);
   playerPalm.castShadow = true;
-  playerArmGroup.add(playerPalm);
+  playerWristGroup.add(playerPalm);
 
-  const playerThumb = new THREE.Mesh(new THREE.CylinderGeometry(0.010, 0.012, 0.045, 8), playerSkinMat);
-  playerThumb.position.set(-0.032, 0.12, 0.05);
-  playerThumb.rotation.z = Math.PI * 0.35;
-  playerThumb.rotation.x = -0.2;
-  playerArmGroup.add(playerThumb);
+  // Helper for multi-jointed articulated fingers
+  interface FingerJointRig {
+    base: THREE.Group;
+    phalanx1: THREE.Mesh;
+    tipGroup: THREE.Group;
+    phalanx2: THREE.Mesh;
+  }
 
-  const fingerGeo = new THREE.CylinderGeometry(0.008, 0.009, 0.052, 8);
-  const fingerPositions = [-0.022, -0.007, 0.008, 0.023];
-  fingerPositions.forEach((fx) => {
-    const finger = new THREE.Mesh(fingerGeo, playerSkinMat);
-    finger.position.set(fx + 0.02, 0.12, 0.11);
-    finger.rotation.x = Math.PI * 0.35;
-    playerArmGroup.add(finger);
-  });
+  function createFingerJoint(
+    xOffset: number,
+    baseLen: number,
+    tipLen: number,
+    thickness: number
+  ): FingerJointRig {
+    const base = new THREE.Group();
+    base.position.set(xOffset, 0, 0.084); // at knuckle line
+
+    const p1Geo = new THREE.CylinderGeometry(thickness * 0.9, thickness, baseLen, 8);
+    p1Geo.translate(0, 0, baseLen / 2);
+    p1Geo.rotateX(Math.PI / 2);
+    const phalanx1 = new THREE.Mesh(p1Geo, pSkinMat);
+    phalanx1.castShadow = true;
+    base.add(phalanx1);
+
+    const tipGroup = new THREE.Group();
+    tipGroup.position.set(0, 0, baseLen);
+    base.add(tipGroup);
+
+    const p2Geo = new THREE.CylinderGeometry(thickness * 0.75, thickness * 0.9, tipLen, 8);
+    p2Geo.translate(0, 0, tipLen / 2);
+    p2Geo.rotateX(Math.PI / 2);
+    const phalanx2 = new THREE.Mesh(p2Geo, pSkinMat);
+    phalanx2.castShadow = true;
+    tipGroup.add(phalanx2);
+
+    return { base, phalanx1, tipGroup, phalanx2 };
+  }
+
+  // 4 Articulated Fingers
+  const indexFinger = createFingerJoint(-0.025, 0.032, 0.024, 0.009);
+  const middleFinger = createFingerJoint(-0.008, 0.035, 0.026, 0.0095);
+  const ringFinger = createFingerJoint(0.009, 0.033, 0.024, 0.009);
+  const pinkyFinger = createFingerJoint(0.026, 0.027, 0.020, 0.008);
+
+  playerWristGroup.add(indexFinger.base);
+  playerWristGroup.add(middleFinger.base);
+  playerWristGroup.add(ringFinger.base);
+  playerWristGroup.add(pinkyFinger.base);
+
+  // Articulated Thumb
+  const thumbBase = new THREE.Group();
+  thumbBase.position.set(-0.038, 0.002, 0.028);
+  thumbBase.rotation.set(-0.2, 0.6, 0.4);
+
+  const thumbP1Geo = new THREE.CylinderGeometry(0.010, 0.012, 0.030, 8);
+  thumbP1Geo.translate(0, 0, 0.015);
+  thumbP1Geo.rotateX(Math.PI / 2);
+  const thumbP1 = new THREE.Mesh(thumbP1Geo, pSkinMat);
+  thumbBase.add(thumbP1);
+
+  const thumbTipGroup = new THREE.Group();
+  thumbTipGroup.position.set(0, 0, 0.030);
+  thumbBase.add(thumbTipGroup);
+
+  const thumbP2Geo = new THREE.CylinderGeometry(0.008, 0.010, 0.026, 8);
+  thumbP2Geo.translate(0, 0, 0.013);
+  thumbP2Geo.rotateX(Math.PI / 2);
+  const thumbP2 = new THREE.Mesh(thumbP2Geo, pSkinMat);
+  thumbTipGroup.add(thumbP2);
+
+  playerWristGroup.add(thumbBase);
 
   // Held OS Boot Drive in Player's Hand
-  const playerHeldDrive = new THREE.Group();
+  const heldDrivePivot = new THREE.Group();
+  heldDrivePivot.position.set(-0.028, -0.006, 0.095);
+  heldDrivePivot.rotation.set(0.1, -0.2, 0.05);
+
   const heldBody = new THREE.Mesh(
-    new THREE.BoxGeometry(0.022, 0.010, 0.046),
+    new THREE.BoxGeometry(0.024, 0.010, 0.050),
     new THREE.MeshStandardMaterial({ color: 0x1f232b, metalness: 0.7, roughness: 0.35 })
   );
-  const heldPin = new THREE.Mesh(new THREE.BoxGeometry(0.014, 0.006, 0.016), pinMat);
-  heldPin.position.set(0, 0, 0.026);
+  const heldPin = new THREE.Mesh(new THREE.BoxGeometry(0.015, 0.006, 0.018), pinMat);
+  heldPin.position.set(0, 0, -0.028);
   const heldLed = new THREE.Mesh(
     new THREE.SphereGeometry(0.003, 8, 8),
     new THREE.MeshBasicMaterial({ color: 0x33ff66 })
   );
-  heldLed.position.set(0, 0.006, -0.016);
-  playerHeldDrive.add(heldBody, heldPin, heldLed);
-  playerHeldDrive.position.set(0.02, 0.13, 0.10);
-  playerHeldDrive.rotation.x = 0.2;
-  playerArmGroup.add(playerHeldDrive);
+  heldLed.position.set(0, 0.006, 0.018);
+  heldDrivePivot.add(heldBody, heldPin, heldLed);
+  playerWristGroup.add(heldDrivePivot);
 
-  // Player Arm Initial Rest Position (below screen view)
-  const playerRestPos = new THREE.Vector3(0.18, 0.88, 0.88);
-  const playerRestRot = new THREE.Vector3(-0.35, -0.15, 0.05);
-  playerArmGroup.position.copy(playerRestPos);
-  playerArmGroup.rotation.set(playerRestRot.x, playerRestRot.y, playerRestRot.z);
-  scene.add(playerArmGroup);
+  // Dynamic finger articulation pose helper
+  function setPlayerFingerPoses(curl: number, splay: number) {
+    // Index
+    indexFinger.base.rotation.x = THREE.MathUtils.lerp(0.05, 0.85, curl);
+    indexFinger.tipGroup.rotation.x = THREE.MathUtils.lerp(0.05, 0.95, curl);
+    indexFinger.base.rotation.y = THREE.MathUtils.lerp(-0.02, 0.12, splay);
+
+    // Middle
+    middleFinger.base.rotation.x = THREE.MathUtils.lerp(0.04, 0.95, curl);
+    middleFinger.tipGroup.rotation.x = THREE.MathUtils.lerp(0.04, 1.05, curl);
+
+    // Ring
+    ringFinger.base.rotation.x = THREE.MathUtils.lerp(0.06, 1.10, curl);
+    ringFinger.tipGroup.rotation.x = THREE.MathUtils.lerp(0.06, 1.15, curl);
+    ringFinger.base.rotation.y = THREE.MathUtils.lerp(0.02, -0.08, splay);
+
+    // Pinky
+    pinkyFinger.base.rotation.x = THREE.MathUtils.lerp(0.08, 1.20, curl);
+    pinkyFinger.tipGroup.rotation.x = THREE.MathUtils.lerp(0.08, 1.25, curl);
+    pinkyFinger.base.rotation.y = THREE.MathUtils.lerp(0.05, -0.15, splay);
+
+    // Thumb
+    thumbBase.rotation.x = THREE.MathUtils.lerp(-0.15, -0.35, curl);
+    thumbBase.rotation.y = THREE.MathUtils.lerp(0.3, 0.85, curl);
+    thumbTipGroup.rotation.x = THREE.MathUtils.lerp(0.05, 0.65, curl);
+  }
+
+  // Initial resting finger pose (gripping the drive)
+  setPlayerFingerPoses(0.95, 0.0);
+
+  // Player Arm Initial Rest Position (anchored below screen view)
+  const playerRestPos = new THREE.Vector3(0.24, 0.82, 0.80);
+  const playerRestRot = new THREE.Vector3(-0.35, -0.22, 0.08);
+  const playerWristRestRot = new THREE.Vector3(0.08, -0.05, 0);
+
+  playerArmRig.position.copy(playerRestPos);
+  playerArmRig.rotation.set(playerRestRot.x, playerRestRot.y, playerRestRot.z);
+  playerWristGroup.rotation.set(playerWristRestRot.x, playerWristRestRot.y, playerWristRestRot.z);
+  scene.add(playerArmRig);
 
   // Camera sway and shake state
   let shakeIntensity = 0;
@@ -1108,6 +1263,7 @@ export function createScene(container: HTMLElement): SceneContext {
   async function fireRecoil(): Promise<void> {
     // Fatal Execution: Keycap slams fully down and sparks burst
     hammer.position.y = 0.052;
+    leftHand.position.y = 0.10;
     muzzleFlash.visible = true;
     muzzleLight.color.setHex(0xff3300);
     muzzleLight.intensity = 8;
@@ -1119,12 +1275,14 @@ export function createScene(container: HTMLElement): SceneContext {
 
   async function clickHammer(): Promise<void> {
     // Safe Execution: Keycap slams down with a tactile mechanical click & springs back
-    hammer.position.y = 0.058;
+    hammer.position.y = 0.056;
+    leftHand.position.y = 0.11;
     muzzleLight.color.setHex(0x33ff66);
     muzzleLight.intensity = 2.5;
 
-    await new Promise(r => setTimeout(r, 80));
+    await new Promise(r => setTimeout(r, 90));
     hammer.position.y = 0.075;
+    leftHand.position.y = 0.18;
     muzzleLight.intensity = 0;
   }
 
@@ -1250,15 +1408,21 @@ export function createScene(container: HTMLElement): SceneContext {
 
   // --- FIRST-PERSON PLAYER ARM ACTION ANIMATION ---
   async function animatePlayerAction(): Promise<void> {
-    // Show held drive in player hand, initially hide console docked drive so player visibly inserts it!
-    playerHeldDrive.visible = true;
+    // Show held drive in player hand with firm pinch grip
+    heldDrivePivot.visible = true;
+    heldDrivePivot.position.set(-0.028, -0.006, 0.095);
     consoleBootDrive.visible = false;
+    setPlayerFingerPoses(0.95, 0.0); // full pinch grip around drive
 
-    // Phase 1: Hand rises up into view and reaches forward towards the drive dock
+    // Phase 1: Arm enters in a natural biomechanical arc, reaching forward towards drive dock
     const durationReach = 450;
-    const startPos = playerArmGroup.position.clone();
-    const reachPos = new THREE.Vector3(-0.04, 1.05, 0.30);
-    const reachRot = new THREE.Vector3(-0.15, 0.05, -0.08);
+    const startPos = playerArmRig.position.clone();
+    const startRot = playerArmRig.rotation.clone();
+    const startWristRot = playerWristGroup.rotation.clone();
+
+    const reachPos = new THREE.Vector3(-0.05, 1.05, 0.36);
+    const reachRot = new THREE.Vector3(-0.16, 0.08, -0.06);
+    const reachWristRot = new THREE.Vector3(-0.14, 0.18, -0.08);
 
     await new Promise<void>(resolve => {
       const startTime = performance.now();
@@ -1266,54 +1430,139 @@ export function createScene(container: HTMLElement): SceneContext {
         const elapsed = performance.now() - startTime;
         const p = Math.min(1, elapsed / durationReach);
         const ease = 1 - Math.pow(1 - p, 3);
-        playerArmGroup.position.lerpVectors(startPos, reachPos, ease);
-        playerArmGroup.rotation.x = THREE.MathUtils.lerp(playerRestRot.x, reachRot.x, ease);
-        playerArmGroup.rotation.y = THREE.MathUtils.lerp(playerRestRot.y, reachRot.y, ease);
-        playerArmGroup.rotation.z = THREE.MathUtils.lerp(playerRestRot.z, reachRot.z, ease);
+
+        playerArmRig.position.lerpVectors(startPos, reachPos, ease);
+        playerArmRig.rotation.x = THREE.MathUtils.lerp(startRot.x, reachRot.x, ease);
+        playerArmRig.rotation.y = THREE.MathUtils.lerp(startRot.y, reachRot.y, ease);
+        playerArmRig.rotation.z = THREE.MathUtils.lerp(startRot.z, reachRot.z, ease);
+
+        playerWristGroup.rotation.x = THREE.MathUtils.lerp(startWristRot.x, reachWristRot.x, ease);
+        playerWristGroup.rotation.y = THREE.MathUtils.lerp(startWristRot.y, reachWristRot.y, ease);
+        playerWristGroup.rotation.z = THREE.MathUtils.lerp(startWristRot.z, reachWristRot.z, ease);
+
+        // Keep fingers gripping
+        setPlayerFingerPoses(0.95, 0.0);
+
         if (p < 1) requestAnimationFrame(step);
         else resolve();
       }
       step();
     });
 
-    // Phase 2: Drive insertion into dock
-    await new Promise(r => setTimeout(r, 120));
-    playerHeldDrive.visible = false;
+    // Phase 2: Align with dock and slide drive straight in!
+    const durationDock = 280;
+    const preDockPos = playerArmRig.position.clone();
+    const dockPos = new THREE.Vector3(-0.11, 1.045, 0.22);
+    const dockWristRot = new THREE.Vector3(-0.05, 0.05, 0);
+
+    await new Promise<void>(resolve => {
+      const startTime = performance.now();
+      function step() {
+        const elapsed = performance.now() - startTime;
+        const p = Math.min(1, elapsed / durationDock);
+        const ease = 1 - Math.pow(1 - p, 2);
+
+        playerArmRig.position.lerpVectors(preDockPos, dockPos, ease);
+        playerWristGroup.rotation.x = THREE.MathUtils.lerp(reachWristRot.x, dockWristRot.x, ease);
+        playerWristGroup.rotation.y = THREE.MathUtils.lerp(reachWristRot.y, dockWristRot.y, ease);
+        playerWristGroup.rotation.z = THREE.MathUtils.lerp(reachWristRot.z, dockWristRot.z, ease);
+
+        // Drive slides into slot
+        heldDrivePivot.position.z = THREE.MathUtils.lerp(0.095, 0.065, ease);
+
+        if (p < 1) requestAnimationFrame(step);
+        else resolve();
+      }
+      step();
+    });
+
+    // Dock latch click: switch to console docked drive
+    heldDrivePivot.visible = false;
     consoleBootDrive.visible = true;
     (driveLed.material as THREE.MeshBasicMaterial).color.setHex(0x33ff66);
 
-    // Phase 3: Hand shifts over the giant red EXEC switch and hovers
-    const hoverPos = new THREE.Vector3(0, 1.09, 0.22);
-    const hoverRot = new THREE.Vector3(-0.05, 0, 0);
-    const durationShift = 250;
+    // Phase 3: Smooth finger release and hand lift away from drive
+    const durationRelease = 220;
+    const preReleasePos = playerArmRig.position.clone();
+    const liftPos = new THREE.Vector3(-0.08, 1.12, 0.22);
+
     await new Promise<void>(resolve => {
       const startTime = performance.now();
-      const curPos = playerArmGroup.position.clone();
       function step() {
         const elapsed = performance.now() - startTime;
-        const p = Math.min(1, elapsed / durationShift);
+        const p = Math.min(1, elapsed / durationRelease);
         const ease = 1 - Math.pow(1 - p, 3);
-        playerArmGroup.position.lerpVectors(curPos, hoverPos, ease);
-        playerArmGroup.rotation.x = THREE.MathUtils.lerp(reachRot.x, hoverRot.x, ease);
+
+        playerArmRig.position.lerpVectors(preReleasePos, liftPos, ease);
+        // Fingers uncurl smoothly to release drive
+        setPlayerFingerPoses(THREE.MathUtils.lerp(0.95, 0.15, ease), THREE.MathUtils.lerp(0.0, 0.4, ease));
+
         if (p < 1) requestAnimationFrame(step);
         else resolve();
       }
       step();
     });
 
-    // Brief tension pause before slam
-    await new Promise(r => setTimeout(r, 140));
+    // Phase 4: Glide over the giant red EXEC switch with open hand
+    const durationHover = 260;
+    const preHoverPos = playerArmRig.position.clone();
+    const hoverPos = new THREE.Vector3(0, 1.12, 0.16);
+    const hoverWristRot = new THREE.Vector3(-0.45, 0, 0); // Wrist cocks back ~25 deg, palm faces down
 
-    // Phase 4: SLAM down firmly onto the red EXEC switch!
-    const slamPos = new THREE.Vector3(0, 1.035, 0.20);
-    const durationSlam = 90;
     await new Promise<void>(resolve => {
       const startTime = performance.now();
-      const curPos = playerArmGroup.position.clone();
       function step() {
         const elapsed = performance.now() - startTime;
-        const p = Math.min(1, elapsed / durationSlam);
-        playerArmGroup.position.lerpVectors(curPos, slamPos, p);
+        const p = Math.min(1, elapsed / durationHover);
+        const ease = 1 - Math.pow(1 - p, 3);
+
+        playerArmRig.position.lerpVectors(preHoverPos, hoverPos, ease);
+        playerWristGroup.rotation.x = THREE.MathUtils.lerp(dockWristRot.x, hoverWristRot.x, ease);
+        playerWristGroup.rotation.y = THREE.MathUtils.lerp(dockWristRot.y, hoverWristRot.y, ease);
+        playerWristGroup.rotation.z = THREE.MathUtils.lerp(dockWristRot.z, hoverWristRot.z, ease);
+
+        // Fingers splay wide ready to slap
+        setPlayerFingerPoses(THREE.MathUtils.lerp(0.15, 0.0, ease), THREE.MathUtils.lerp(0.4, 0.85, ease));
+
+        if (p < 1) requestAnimationFrame(step);
+        else resolve();
+      }
+      step();
+    });
+
+    // Suspense hesitation pause over the glowing switch
+    await new Promise(r => setTimeout(r, 140));
+
+    // Phase 5: Windup lift (2.5cm) then forceful SLAM down!
+    const windupPos = new THREE.Vector3(0, 1.155, 0.15);
+    const slamPos = new THREE.Vector3(0, 1.030, 0.15);
+    const slamWristRot = new THREE.Vector3(0.05, 0, 0); // Flat palm slap
+
+    // Quick windup (60ms)
+    await new Promise<void>(resolve => {
+      const startTime = performance.now();
+      function step() {
+        const elapsed = performance.now() - startTime;
+        const p = Math.min(1, elapsed / 60);
+        playerArmRig.position.lerpVectors(hoverPos, windupPos, p);
+        if (p < 1) requestAnimationFrame(step);
+        else resolve();
+      }
+      step();
+    });
+
+    // Downward slam strike (75ms)
+    await new Promise<void>(resolve => {
+      const startTime = performance.now();
+      function step() {
+        const elapsed = performance.now() - startTime;
+        const p = Math.min(1, elapsed / 75);
+        playerArmRig.position.lerpVectors(windupPos, slamPos, p);
+        playerWristGroup.rotation.x = THREE.MathUtils.lerp(hoverWristRot.x, slamWristRot.x, p);
+
+        // Fingers flex on impact absorbing force
+        setPlayerFingerPoses(THREE.MathUtils.lerp(0.0, 0.22, p), THREE.MathUtils.lerp(0.85, 0.5, p));
+
         if (p < 1) requestAnimationFrame(step);
         else resolve();
       }
@@ -1321,12 +1570,14 @@ export function createScene(container: HTMLElement): SceneContext {
     });
 
     // Switch keycap bottoms out
-    hammer.position.y = 0.054;
+    hammer.position.y = 0.052;
   }
 
   async function retractPlayerArm(): Promise<void> {
-    const durationRetract = 380;
-    const startPos = playerArmGroup.position.clone();
+    const durationRetract = 420;
+    const startPos = playerArmRig.position.clone();
+    const startRot = playerArmRig.rotation.clone();
+    const startWristRot = playerWristGroup.rotation.clone();
     const startTime = performance.now();
 
     return new Promise(resolve => {
@@ -1334,10 +1585,19 @@ export function createScene(container: HTMLElement): SceneContext {
         const elapsed = performance.now() - startTime;
         const p = Math.min(1, elapsed / durationRetract);
         const ease = 1 - Math.pow(1 - p, 3);
-        playerArmGroup.position.lerpVectors(startPos, playerRestPos, ease);
-        playerArmGroup.rotation.x = THREE.MathUtils.lerp(playerArmGroup.rotation.x, playerRestRot.x, ease);
-        playerArmGroup.rotation.y = THREE.MathUtils.lerp(playerArmGroup.rotation.y, playerRestRot.y, ease);
-        playerArmGroup.rotation.z = THREE.MathUtils.lerp(playerArmGroup.rotation.z, playerRestRot.z, ease);
+
+        playerArmRig.position.lerpVectors(startPos, playerRestPos, ease);
+        playerArmRig.rotation.x = THREE.MathUtils.lerp(startRot.x, playerRestRot.x, ease);
+        playerArmRig.rotation.y = THREE.MathUtils.lerp(startRot.y, playerRestRot.y, ease);
+        playerArmRig.rotation.z = THREE.MathUtils.lerp(startRot.z, playerRestRot.z, ease);
+
+        playerWristGroup.rotation.x = THREE.MathUtils.lerp(startWristRot.x, playerWristRestRot.x, ease);
+        playerWristGroup.rotation.y = THREE.MathUtils.lerp(startWristRot.y, playerWristRestRot.y, ease);
+        playerWristGroup.rotation.z = THREE.MathUtils.lerp(startWristRot.z, playerWristRestRot.z, ease);
+
+        // Fingers relax back to resting pose
+        setPlayerFingerPoses(THREE.MathUtils.lerp(0.22, 0.4, ease), THREE.MathUtils.lerp(0.5, 0.1, ease));
+
         if (p < 1) requestAnimationFrame(step);
         else resolve();
       }
