@@ -17,6 +17,9 @@ export interface SceneContext {
   fireRecoil: () => Promise<void>;
   clickHammer: () => Promise<void>;
   setOpponentDefeated: (defeated: boolean) => void;
+  zoomConsole: (zoomIn: boolean, durationMs?: number) => Promise<void>;
+  animatePlayerAction: () => Promise<void>;
+  retractPlayerArm: () => Promise<void>;
 }
 
 export function createScene(container: HTMLElement): SceneContext {
@@ -928,7 +931,128 @@ export function createScene(container: HTMLElement): SceneContext {
   muzzleLight.position.set(0, 0.12, 0.06);
   revolverGroup.add(muzzleLight);
 
+  // --- PAYLOAD DRIVE DOCK & BOOT DRIVE ---
+  const driveDockHousing = new THREE.Mesh(new THREE.BoxGeometry(0.048, 0.02, 0.075), chromeMat);
+  driveDockHousing.position.set(-0.11, 0.055, 0.02);
+  revolverGroup.add(driveDockHousing);
+
+  // Dock slot cavity
+  const dockCavity = new THREE.Mesh(
+    new THREE.BoxGeometry(0.028, 0.012, 0.052),
+    new THREE.MeshBasicMaterial({ color: 0x050810 })
+  );
+  dockCavity.position.set(-0.11, 0.062, 0.02);
+  revolverGroup.add(dockCavity);
+
+  // Gold contact pins
+  const pinMat = new THREE.MeshStandardMaterial({ color: 0xffd700, metalness: 0.9, roughness: 0.2 });
+  const contactPin1 = new THREE.Mesh(new THREE.BoxGeometry(0.003, 0.002, 0.02), pinMat);
+  contactPin1.position.set(-0.115, 0.058, 0.02);
+  revolverGroup.add(contactPin1);
+  const contactPin2 = new THREE.Mesh(new THREE.BoxGeometry(0.003, 0.002, 0.02), pinMat);
+  contactPin2.position.set(-0.105, 0.058, 0.02);
+  revolverGroup.add(contactPin2);
+
+  // Console OS Boot Drive (Docked representation)
+  const consoleBootDrive = new THREE.Group();
+  const driveBody = new THREE.Mesh(
+    new THREE.BoxGeometry(0.024, 0.010, 0.048),
+    new THREE.MeshStandardMaterial({ color: 0x1f232b, metalness: 0.7, roughness: 0.35 })
+  );
+  driveBody.castShadow = true;
+  consoleBootDrive.add(driveBody);
+
+  const driveConnector = new THREE.Mesh(new THREE.BoxGeometry(0.016, 0.006, 0.016), pinMat);
+  driveConnector.position.set(0, 0, -0.026);
+  consoleBootDrive.add(driveConnector);
+
+  const driveLed = new THREE.Mesh(
+    new THREE.SphereGeometry(0.003, 8, 8),
+    new THREE.MeshBasicMaterial({ color: 0x33ff66 })
+  );
+  driveLed.position.set(0, 0.006, 0.016);
+  consoleBootDrive.add(driveLed);
+
+  consoleBootDrive.position.set(-0.11, 0.068, 0.02);
+  consoleBootDrive.visible = true;
+  revolverGroup.add(consoleBootDrive);
+
   scene.add(revolverGroup);
+
+  // --- FIRST-PERSON PLAYER ARM & HAND (POV) ---
+  const playerArmGroup = new THREE.Group();
+
+  const sleeveMat = new THREE.MeshStandardMaterial({
+    color: 0x1b2028,
+    roughness: 0.9,
+    metalness: 0.1
+  });
+  const playerForearm = new THREE.Mesh(new THREE.CylinderGeometry(0.038, 0.048, 0.36, 16), sleeveMat);
+  playerForearm.rotation.x = Math.PI * 0.42;
+  playerForearm.rotation.y = -0.15;
+  playerForearm.position.set(0.06, 0.02, -0.16);
+  playerForearm.castShadow = true;
+  playerArmGroup.add(playerForearm);
+
+  const sleeveCuff = new THREE.Mesh(
+    new THREE.TorusGeometry(0.042, 0.008, 8, 16),
+    new THREE.MeshStandardMaterial({ color: 0x11151a, roughness: 0.95 })
+  );
+  sleeveCuff.rotation.x = Math.PI * 0.42;
+  sleeveCuff.position.set(0.04, 0.08, -0.01);
+  playerArmGroup.add(sleeveCuff);
+
+  const playerSkinMat = new THREE.MeshStandardMaterial({
+    color: 0xd69975,
+    roughness: 0.62,
+    metalness: 0.08
+  });
+
+  const playerPalm = new THREE.Mesh(new THREE.BoxGeometry(0.072, 0.022, 0.078), playerSkinMat);
+  playerPalm.position.set(0.02, 0.12, 0.06);
+  playerPalm.rotation.x = 0.2;
+  playerPalm.castShadow = true;
+  playerArmGroup.add(playerPalm);
+
+  const playerThumb = new THREE.Mesh(new THREE.CylinderGeometry(0.010, 0.012, 0.045, 8), playerSkinMat);
+  playerThumb.position.set(-0.032, 0.12, 0.05);
+  playerThumb.rotation.z = Math.PI * 0.35;
+  playerThumb.rotation.x = -0.2;
+  playerArmGroup.add(playerThumb);
+
+  const fingerGeo = new THREE.CylinderGeometry(0.008, 0.009, 0.052, 8);
+  const fingerPositions = [-0.022, -0.007, 0.008, 0.023];
+  fingerPositions.forEach((fx) => {
+    const finger = new THREE.Mesh(fingerGeo, playerSkinMat);
+    finger.position.set(fx + 0.02, 0.12, 0.11);
+    finger.rotation.x = Math.PI * 0.35;
+    playerArmGroup.add(finger);
+  });
+
+  // Held OS Boot Drive in Player's Hand
+  const playerHeldDrive = new THREE.Group();
+  const heldBody = new THREE.Mesh(
+    new THREE.BoxGeometry(0.022, 0.010, 0.046),
+    new THREE.MeshStandardMaterial({ color: 0x1f232b, metalness: 0.7, roughness: 0.35 })
+  );
+  const heldPin = new THREE.Mesh(new THREE.BoxGeometry(0.014, 0.006, 0.016), pinMat);
+  heldPin.position.set(0, 0, 0.026);
+  const heldLed = new THREE.Mesh(
+    new THREE.SphereGeometry(0.003, 8, 8),
+    new THREE.MeshBasicMaterial({ color: 0x33ff66 })
+  );
+  heldLed.position.set(0, 0.006, -0.016);
+  playerHeldDrive.add(heldBody, heldPin, heldLed);
+  playerHeldDrive.position.set(0.02, 0.13, 0.10);
+  playerHeldDrive.rotation.x = 0.2;
+  playerArmGroup.add(playerHeldDrive);
+
+  // Player Arm Initial Rest Position (below screen view)
+  const playerRestPos = new THREE.Vector3(0.18, 0.88, 0.88);
+  const playerRestRot = new THREE.Vector3(-0.35, -0.15, 0.05);
+  playerArmGroup.position.copy(playerRestPos);
+  playerArmGroup.rotation.set(playerRestRot.x, playerRestRot.y, playerRestRot.z);
+  scene.add(playerArmGroup);
 
   // Camera sway and shake state
   let shakeIntensity = 0;
@@ -1097,6 +1221,130 @@ export function createScene(container: HTMLElement): SceneContext {
     });
   }
 
+  // --- CINEMATIC CONSOLE ZOOM ---
+  let consoleZoomProgress = 0; // 0 = default over-the-shoulder, 1 = close up on console
+  const zoomCamPos = new THREE.Vector3(0, 1.20, 0.38);
+  const zoomCamLook = new THREE.Vector3(0, 0.99, -0.05);
+
+  async function zoomConsole(zoomIn: boolean, durationMs = 500): Promise<void> {
+    const startZoom = consoleZoomProgress;
+    const targetZoom = zoomIn ? 1 : 0;
+    const startTime = performance.now();
+
+    return new Promise(resolve => {
+      function step() {
+        const elapsed = performance.now() - startTime;
+        const p = Math.min(1, elapsed / durationMs);
+        const ease = 1 - Math.pow(1 - p, 3);
+        consoleZoomProgress = THREE.MathUtils.lerp(startZoom, targetZoom, ease);
+        if (p < 1) {
+          requestAnimationFrame(step);
+        } else {
+          consoleZoomProgress = targetZoom;
+          resolve();
+        }
+      }
+      step();
+    });
+  }
+
+  // --- FIRST-PERSON PLAYER ARM ACTION ANIMATION ---
+  async function animatePlayerAction(): Promise<void> {
+    // Show held drive in player hand, initially hide console docked drive so player visibly inserts it!
+    playerHeldDrive.visible = true;
+    consoleBootDrive.visible = false;
+
+    // Phase 1: Hand rises up into view and reaches forward towards the drive dock
+    const durationReach = 450;
+    const startPos = playerArmGroup.position.clone();
+    const reachPos = new THREE.Vector3(-0.04, 1.05, 0.30);
+    const reachRot = new THREE.Vector3(-0.15, 0.05, -0.08);
+
+    await new Promise<void>(resolve => {
+      const startTime = performance.now();
+      function step() {
+        const elapsed = performance.now() - startTime;
+        const p = Math.min(1, elapsed / durationReach);
+        const ease = 1 - Math.pow(1 - p, 3);
+        playerArmGroup.position.lerpVectors(startPos, reachPos, ease);
+        playerArmGroup.rotation.x = THREE.MathUtils.lerp(playerRestRot.x, reachRot.x, ease);
+        playerArmGroup.rotation.y = THREE.MathUtils.lerp(playerRestRot.y, reachRot.y, ease);
+        playerArmGroup.rotation.z = THREE.MathUtils.lerp(playerRestRot.z, reachRot.z, ease);
+        if (p < 1) requestAnimationFrame(step);
+        else resolve();
+      }
+      step();
+    });
+
+    // Phase 2: Drive insertion into dock
+    await new Promise(r => setTimeout(r, 120));
+    playerHeldDrive.visible = false;
+    consoleBootDrive.visible = true;
+    (driveLed.material as THREE.MeshBasicMaterial).color.setHex(0x33ff66);
+
+    // Phase 3: Hand shifts over the giant red EXEC switch and hovers
+    const hoverPos = new THREE.Vector3(0, 1.09, 0.22);
+    const hoverRot = new THREE.Vector3(-0.05, 0, 0);
+    const durationShift = 250;
+    await new Promise<void>(resolve => {
+      const startTime = performance.now();
+      const curPos = playerArmGroup.position.clone();
+      function step() {
+        const elapsed = performance.now() - startTime;
+        const p = Math.min(1, elapsed / durationShift);
+        const ease = 1 - Math.pow(1 - p, 3);
+        playerArmGroup.position.lerpVectors(curPos, hoverPos, ease);
+        playerArmGroup.rotation.x = THREE.MathUtils.lerp(reachRot.x, hoverRot.x, ease);
+        if (p < 1) requestAnimationFrame(step);
+        else resolve();
+      }
+      step();
+    });
+
+    // Brief tension pause before slam
+    await new Promise(r => setTimeout(r, 140));
+
+    // Phase 4: SLAM down firmly onto the red EXEC switch!
+    const slamPos = new THREE.Vector3(0, 1.035, 0.20);
+    const durationSlam = 90;
+    await new Promise<void>(resolve => {
+      const startTime = performance.now();
+      const curPos = playerArmGroup.position.clone();
+      function step() {
+        const elapsed = performance.now() - startTime;
+        const p = Math.min(1, elapsed / durationSlam);
+        playerArmGroup.position.lerpVectors(curPos, slamPos, p);
+        if (p < 1) requestAnimationFrame(step);
+        else resolve();
+      }
+      step();
+    });
+
+    // Switch keycap bottoms out
+    hammer.position.y = 0.054;
+  }
+
+  async function retractPlayerArm(): Promise<void> {
+    const durationRetract = 380;
+    const startPos = playerArmGroup.position.clone();
+    const startTime = performance.now();
+
+    return new Promise(resolve => {
+      function step() {
+        const elapsed = performance.now() - startTime;
+        const p = Math.min(1, elapsed / durationRetract);
+        const ease = 1 - Math.pow(1 - p, 3);
+        playerArmGroup.position.lerpVectors(startPos, playerRestPos, ease);
+        playerArmGroup.rotation.x = THREE.MathUtils.lerp(playerArmGroup.rotation.x, playerRestRot.x, ease);
+        playerArmGroup.rotation.y = THREE.MathUtils.lerp(playerArmGroup.rotation.y, playerRestRot.y, ease);
+        playerArmGroup.rotation.z = THREE.MathUtils.lerp(playerArmGroup.rotation.z, playerRestRot.z, ease);
+        if (p < 1) requestAnimationFrame(step);
+        else resolve();
+      }
+      step();
+    });
+  }
+
   let isOpponentDead = false;
   let lastBlink = 0;
 
@@ -1149,12 +1397,16 @@ export function createScene(container: HTMLElement): SceneContext {
       shakeIntensity *= 0.88;
     }
 
+    // Interpolate camera position and lookAt between default view and console zoom
+    const curPos = new THREE.Vector3().lerpVectors(baseCamPos, zoomCamPos, consoleZoomProgress);
+    const curLook = new THREE.Vector3().lerpVectors(baseCamLook, zoomCamLook, consoleZoomProgress);
+
     camera.position.set(
-      baseCamPos.x + swayX + shakeX,
-      baseCamPos.y + swayY + pushY + shakeY,
-      baseCamPos.z + pushZ
+      curPos.x + swayX + shakeX,
+      curPos.y + swayY + pushY + shakeY,
+      curPos.z + pushZ
     );
-    camera.lookAt(baseCamLook.x, baseCamLook.y, baseCamLook.z);
+    camera.lookAt(curLook.x, curLook.y, curLook.z);
 
     renderer.render(scene, camera);
   }
@@ -1186,7 +1438,10 @@ export function createScene(container: HTMLElement): SceneContext {
     aimRevolver,
     fireRecoil,
     clickHammer,
-    setOpponentDefeated
+    setOpponentDefeated,
+    zoomConsole,
+    animatePlayerAction,
+    retractPlayerArm
   };
 }
 

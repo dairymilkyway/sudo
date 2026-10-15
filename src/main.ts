@@ -24,7 +24,8 @@ const playerTerminal = new VirtualTerminal({
   bgColor: '#061308',
   textColor: '#33ff66',
   promptPrefix: 'player@archlinux:~$ ',
-  fontSize: 22
+  fontSize: 22,
+  osType: 'linux'
 });
 
 const botTerminal = new VirtualTerminal({
@@ -33,15 +34,17 @@ const botTerminal = new VirtualTerminal({
   bgColor: '#06111e',
   textColor: '#00a4ef',
   promptPrefix: 'C:\\Users\\Administrator> ',
-  fontSize: 22
+  fontSize: 22,
+  osType: 'windows'
 });
 
 sceneContext.setMonitorTextures(playerTerminal.getTexture(), botTerminal.getTexture());
 
 function initTerminals() {
   playerTerminal.clear();
-  playerTerminal.addLine('Kernel Roulette v1.0.0 (tty1)');
-  playerTerminal.addLine('Arbiter online. 6 execution slots, 1 fatal root payload.');
+  playerTerminal.addLine('Dual-Boot Arbiter online (/dev/ttyS0)');
+  playerTerminal.addLine('System ready: 6 slots armed, 1 fatal root payload.');
+  playerTerminal.addLine('Click EXECUTE or SPIN & EXEC to advance.');
 
   botTerminal.clear();
   botTerminal.addLine('Microsoft Windows [Version 10.0.19045.3803]');
@@ -113,30 +116,44 @@ async function handleAction(actor: 'player' | 'bot', action: ActionType) {
 
   const terminal = actor === 'player' ? playerTerminal : botTerminal;
 
+  // 1. Cinematic Zoom-in on the Dual-Boot Arbiter Console
+  await sceneContext.zoomConsole(true, 450);
+
   if (action === 'spin') {
     terminal.addLine(`[ACTION] Re-indexing rotary payload dial...`);
     soundFX.playSpin();
     await sceneContext.spinRevolver();
   }
 
-  // Aim switch / focus on the active actor
-  await sceneContext.aimRevolver(actor);
-  sceneContext.setCameraPush(0.5);
+  // 2. Animate Hand & Drive Placement / Switch Slam
+  if (actor === 'player') {
+    terminal.addLine(`[ACTION] Docking OS payload drive & arming SUDO...`);
+    soundFX.playDriveInsert();
+    await sceneContext.animatePlayerAction();
+  } else {
+    terminal.addLine(`[ACTION] Windows technician reaching for EXEC...`);
+    await sceneContext.aimRevolver('bot');
+    await sceneContext.clickHammer();
+  }
 
   const result = engine.executeAction(action);
 
   if (result.isBullet) {
     terminal.addLine(`*BOOM!* [FATAL DISCHARGE]: Slot #${result.chamber + 1} EXECUTED!`);
-    sceneContext.setCameraShake(0.12);
+    sceneContext.setCameraShake(0.18);
     updateHUD();
 
     // Trigger visual switch depression & electrical spark flash
     await sceneContext.fireRecoil();
 
-    setTimeout(() => {
-      sceneContext.setCameraPush(0);
+    if (actor === 'player') {
+      await sceneContext.retractPlayerArm();
+    } else {
       sceneContext.aimRevolver('center');
-    }, 1200);
+    }
+
+    await new Promise(r => setTimeout(r, 600));
+    await sceneContext.zoomConsole(false, 600);
 
     // Trigger OS Death sequence
     if (actor === 'player') {
@@ -150,12 +167,18 @@ async function handleAction(actor: 'player' | 'bot', action: ActionType) {
     soundFX.playEmptyClick();
     await sceneContext.clickHammer();
     terminal.addLine(`*CLACK* [DRY-RUN]: Slot #${result.chamber + 1} safe. Zero byte corruption.`);
-    sceneContext.setCameraShake(0.02);
+    sceneContext.setCameraShake(0.025);
     updateHUD();
 
-    await new Promise(r => setTimeout(r, 600));
-    sceneContext.setCameraPush(0);
-    await sceneContext.aimRevolver('center');
+    if (actor === 'player') {
+      await sceneContext.retractPlayerArm();
+    } else {
+      await sceneContext.aimRevolver('center');
+    }
+
+    await new Promise(r => setTimeout(r, 450));
+    // Zoom back out smoothly to full-desk battle view
+    await sceneContext.zoomConsole(false, 500);
 
     // If next is bot, trigger bot turn
     if (engine.getState().phase === 'bot_turn') {

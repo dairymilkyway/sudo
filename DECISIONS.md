@@ -76,6 +76,19 @@
 - Bot animation: The Windows opponent lifts his left arm off the keyboard, hovers his hand directly over the big red button while delivering trash talk, and slams it down with physical impact.
 - Audio synthesis: Tuned WebAudio oscillators for heavy tactile switch buckling spring snaps, stepper motor dial ticks, and capacitor arc blowouts.
 
+## Enhancement: First-Person Player Hand, Cinematic Zoom & Realistic Monitors
+- **First-Person POV Player Hand Animation**:
+  - Implemented 3D low-poly modeled player arm with dark tactical hoodie sleeve, ribbed cuff, natural skin-toned palm, knuckles, thumb, and fingers.
+  - Added the **Payload Drive Dock** on the Dual-Boot Arbiter console and the **OS Boot Drive** (anodized gunmetal casing, gold contact pins, and status LED).
+  - When the player executes or spins: The player's first-person hand rises up into view holding the OS boot drive, docks it into the console with a physical latch sound, hovers over the giant red `[ EXEC ]` switch, and slams down with full force before retracting.
+- **Cinematic Console Zoom Animation**:
+  - Implemented smooth 500ms cubic ease-out dynamic camera zoom: pushes in from the default over-the-shoulder view (`z = 1.42, y = 1.44`) to a high-tension close-up on the Arbiter console (`z = 0.38, y = 1.20`) looking directly down at the dial and switch.
+  - Plays on every `EXECUTE` and `SPIN & EXEC`, giving full cinematic visual focus to the spinning rotary dial, LEDs, drive placement, and switch slam, before easing smoothly back to the battle view.
+- **Hyper-Realistic Operating System Monitor Displays**:
+  - Linux (Player Monitor): Waybar status bar with workspace pills (`[1:term] [2:code] [3:web]`), system stats (CPU 12%, RAM 1.4G/16G, clock), window chrome with red/yellow/green control dots, active bash tab, ANSI syntax colors, and CRT phosphor bloom.
+  - Windows (Bot Monitor): Authentic Windows 10/11 Command Prompt title bar, Administrator tab with `C:\>` icon, Windows minimize/maximize/close buttons (`🗕 🗖 ✕`), blue CRT backlight bleed.
+  - CRT curvature inner vignette gradient and diagonal screen glass glare reflection.
+
 
 
 
