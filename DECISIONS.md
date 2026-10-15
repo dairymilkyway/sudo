@@ -76,21 +76,23 @@
 - Bot animation: The Windows opponent lifts his left arm off the keyboard, hovers his hand directly over the big red button while delivering trash talk, and slams it down with physical impact.
 - Audio synthesis: Tuned WebAudio oscillators for heavy tactile switch buckling spring snaps, stepper motor dial ticks, and capacitor arc blowouts.
 
-## Enhancement: Realistic Articulated Hand & Biomechanical Animation
-- **Procedural Canvas Textures for Player**:
-  - High-resolution procedural skin canvas with warm tones, natural palm creases, shaded knuckle contours, and realistic fingernails with gloss highlights.
-  - Dark charcoal hoodie fabric canvas with woven textile grid pattern and green seam stitching.
-- **Articulated Skeletal Hand Rig**:
-  - Built a hierarchical 3-level joint skeleton: `playerArmRig` -> `playerForearmGroup` -> `playerWristGroup` -> `playerPalm` with 5 independently articulated digits.
-  - All 4 fingers (Index, Middle, Ring, Pinky) and Thumb are multi-jointed with base knuckle pivots and tip phalanx groups.
-  - Implemented `setPlayerFingerPoses(curl, splay)` for natural anatomical hand postures (tight pinch, relaxed hold, open splay, impact flexion).
-- **Realistic 6-Phase Biomechanical Animation**:
-  1. *Arc Entrance*: Arm rises from off-screen in a curved biomechanical arc with fingers in a natural pinch grip securing the OS boot drive.
-  2. *Docking Alignment & Slide*: Wrist tilts to align the drive with the dock; drive physically translates into the slot until it latches.
-  3. *Finger Release & Lift*: Fingers uncurl smoothly to release the drive as the dock LED illuminates green; hand lifts away.
-  4. *Open-Hand Transition & Hover*: Wrist cocks back ~25°, palm faces downward, fingers splay wide over the big red EXEC switch with high-tension micro-anticipation.
-  5. *Windup & Dynamic Slam*: Hand executes a fast 2.5cm upward windup, then drives down with explosive acceleration onto the switch; fingers and wrist flex on impact to absorb force as the keycap bottoms out.
-  6. *Natural Recovery*: Fingers relax into an anatomical resting curve as the arm smoothly swings back down to rest near the keyboard.
+## Enhancement: High-Polish Tactical Hacker Glove & Continuous Spline Animation
+- **Visual Polish & Organic Joint Geometry**:
+  - Replaced raw boxy primitives with a sculpted **Fingerless Tactical Hacker Glove**:
+    - Matte dark carbon-reinforced leather body with textured silicone palm grip pad.
+    - Carbon-fiber composite knuckle guard plate on the back of hand with 4 titanium rivet fasteners.
+    - Anatomical thenar thumb muscle pad bridging the palm to the thumb.
+    - Tactical wrist watch unit on the sleeve with green digital display.
+  - Eliminated awkward joint gaps by adding **spherical knuckle and interphalangeal joint caps** at every bend: joints now remain smooth and organic throughout any curl angle.
+  - Fingertip rounded anatomical domes with smooth keratin fingernail plates.
+  - Long 0.48m sleeve ensuring zero mesh clipping or floating geometry in any camera angle.
+- **Dedicated Hand & Console Studio Lighting**:
+  - Added a focused warm spotlight (`0xfff2e0`, 2.2 intensity) directly illuminating the player's hands and the Arbiter console faceplate.
+  - Added soft green rim lighting reflecting off the Arch Linux display onto the side of the glove.
+- **Single Continuous Spline Animation Loop**:
+  - Replaced stepped multi-promise pauses with a single continuous parametric animation curve (1250ms):
+    - Fluid arc entrance -> continuous dock glide & drive insertion -> smooth finger peel-off -> open-palm arc transition -> high-tension micro-tremor hover -> upward coil wind-up -> explosive palm impact strike -> natural follow-through and recoil.
+
 
 
 
