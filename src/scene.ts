@@ -802,74 +802,132 @@ export function createScene(container: HTMLElement): SceneContext {
   opponentFill.position.set(-0.6, 1.8, -0.6);
   scene.add(opponentFill);
 
-  // Revolver Model (low-poly)
+  // --- KERNEL ROULETTE ARBITER CONSOLE ---
+  // Replaces the revolver with an industrial dual-boot execution device
   const revolverGroup = new THREE.Group();
-  revolverGroup.position.set(0, 0.98, -0.15);
+  revolverGroup.position.set(0, 0.941, -0.15);
 
-  const metalMat = new THREE.MeshStandardMaterial({
-    color: 0x4a4f57,
+  const consoleBaseMat = new THREE.MeshStandardMaterial({
+    color: 0x1a1e28,
     roughness: 0.35,
-    metalness: 0.85
+    metalness: 0.8
+  });
+  const chromeMat = new THREE.MeshStandardMaterial({
+    color: 0x9098a8,
+    roughness: 0.2,
+    metalness: 0.9
   });
   const darkMetalMat = new THREE.MeshStandardMaterial({
-    color: 0x24282e,
-    roughness: 0.4,
-    metalness: 0.75
-  });
-  const gripWoodMat = new THREE.MeshStandardMaterial({
-    color: 0x5a2d16,
-    roughness: 0.6
+    color: 0x12151d,
+    roughness: 0.45,
+    metalness: 0.7
   });
 
-  // Grip
-  const grip = new THREE.Mesh(new THREE.BoxGeometry(0.045, 0.15, 0.08), gripWoodMat);
-  grip.position.set(0, -0.05, 0.11);
-  grip.rotation.x = -0.35;
-  revolverGroup.add(grip);
+  // Console Chassis (industrial brushed metal console)
+  const consoleBase = new THREE.Mesh(new THREE.BoxGeometry(0.36, 0.05, 0.28), consoleBaseMat);
+  consoleBase.position.y = 0.025;
+  consoleBase.castShadow = true;
+  consoleBase.receiveShadow = true;
+  revolverGroup.add(consoleBase);
 
-  // Frame / Body
-  const frame = new THREE.Mesh(new THREE.BoxGeometry(0.055, 0.09, 0.15), metalMat);
-  frame.position.set(0, 0.02, 0.04);
-  revolverGroup.add(frame);
+  // Top plate with dual-boot branding
+  const plateMat = new THREE.MeshStandardMaterial({ color: 0x0f1218, roughness: 0.7 });
+  const topPlate = new THREE.Mesh(new THREE.BoxGeometry(0.33, 0.005, 0.25), plateMat);
+  topPlate.position.set(0, 0.052, 0);
+  revolverGroup.add(topPlate);
 
-  // Hammer
-  const hammer = new THREE.Mesh(new THREE.BoxGeometry(0.015, 0.04, 0.03), darkMetalMat);
-  hammer.position.set(0, 0.065, 0.11);
-  hammer.rotation.x = 0.4;
-  revolverGroup.add(hammer);
+  // Linux side indicator strip (left - Arch green)
+  const linuxStrip = new THREE.Mesh(
+    new THREE.BoxGeometry(0.008, 0.006, 0.20),
+    new THREE.MeshBasicMaterial({ color: 0x33ff66 })
+  );
+  linuxStrip.position.set(-0.15, 0.054, 0);
+  revolverGroup.add(linuxStrip);
 
-  // Cylinder (chamber) - rotates on SPIN
-  const cylinderGeo = new THREE.CylinderGeometry(0.048, 0.048, 0.12, 6);
-  cylinderGeo.rotateX(Math.PI / 2);
+  // Windows side indicator strip (right - Windows blue)
+  const winStrip = new THREE.Mesh(
+    new THREE.BoxGeometry(0.008, 0.006, 0.20),
+    new THREE.MeshBasicMaterial({ color: 0x00a4ef })
+  );
+  winStrip.position.set(0.15, 0.054, 0);
+  revolverGroup.add(winStrip);
+
+  // Rotary Chamber Cylinder Dial (6 chambers)
+  const cylinderGeo = new THREE.CylinderGeometry(0.065, 0.068, 0.03, 18);
   const cylinderMesh = new THREE.Mesh(cylinderGeo, darkMetalMat);
-  cylinderMesh.position.set(0, 0.03, -0.01);
+  cylinderMesh.position.set(0, 0.065, -0.045);
+  cylinderMesh.castShadow = true;
+
+  // 6 chamber LED indicator dots on top of the dial
+  const chamberLeds: THREE.Mesh[] = [];
+  for (let i = 0; i < 6; i++) {
+    const angle = (i * Math.PI) / 3;
+    const ledX = Math.sin(angle) * 0.048;
+    const ledZ = Math.cos(angle) * 0.048;
+    const led = new THREE.Mesh(
+      new THREE.SphereGeometry(0.005, 8, 8),
+      new THREE.MeshBasicMaterial({ color: 0x556677 })
+    );
+    led.position.set(ledX, 0.016, ledZ);
+    cylinderMesh.add(led);
+    chamberLeds.push(led);
+  }
   revolverGroup.add(cylinderMesh);
 
-  // Barrel
-  const barrel = new THREE.Mesh(new THREE.CylinderGeometry(0.022, 0.024, 0.24, 12), metalMat);
-  barrel.position.set(0, 0.045, -0.18);
-  barrel.rotation.x = Math.PI / 2;
-  revolverGroup.add(barrel);
+  // Dial knurled rim ring
+  const dialRing = new THREE.Mesh(new THREE.CylinderGeometry(0.072, 0.072, 0.015, 24), chromeMat);
+  dialRing.position.set(0, 0.06, -0.045);
+  revolverGroup.add(dialRing);
 
-  // Muzzle flash mesh & light
-  const muzzleFlashGeo = new THREE.SphereGeometry(0.08, 8, 8);
-  const muzzleFlashMat = new THREE.MeshBasicMaterial({ color: 0xffea78, wireframe: true });
+  // --- GIANT "EXEC / SUDO" RED MECHANICAL SWITCH ---
+  // Switch Housing / Bezel
+  const switchHousing = new THREE.Mesh(new THREE.BoxGeometry(0.088, 0.024, 0.088), chromeMat);
+  switchHousing.position.set(0, 0.06, 0.06);
+  revolverGroup.add(switchHousing);
+
+  // Keycap Canvas Texture (256x256)
+  const keyCanvas = document.createElement('canvas');
+  keyCanvas.width = 256;
+  keyCanvas.height = 256;
+  const kCtx = keyCanvas.getContext('2d')!;
+  kCtx.fillStyle = '#d92626';
+  kCtx.fillRect(0, 0, 256, 256);
+  // Beveled border
+  kCtx.strokeStyle = '#ff5555';
+  kCtx.lineWidth = 14;
+  kCtx.strokeRect(7, 7, 242, 242);
+  kCtx.fillStyle = '#ffffff';
+  kCtx.font = 'bold 54px monospace';
+  kCtx.textAlign = 'center';
+  kCtx.textBaseline = 'middle';
+  kCtx.fillText('EXEC', 128, 128);
+  const keycapTexture = new THREE.CanvasTexture(keyCanvas);
+
+  const keycapMat = [
+    new THREE.MeshStandardMaterial({ color: 0xbb2020, roughness: 0.4 }),
+    new THREE.MeshStandardMaterial({ color: 0xbb2020, roughness: 0.4 }),
+    new THREE.MeshStandardMaterial({ map: keycapTexture, roughness: 0.35 }), // Top face
+    new THREE.MeshStandardMaterial({ color: 0x881515, roughness: 0.6 }),
+    new THREE.MeshStandardMaterial({ color: 0xbb2020, roughness: 0.4 }),
+    new THREE.MeshStandardMaterial({ color: 0xbb2020, roughness: 0.4 })
+  ];
+  const hammer = new THREE.Mesh(new THREE.BoxGeometry(0.072, 0.028, 0.072), keycapMat); // Red mechanical switch keycap
+  hammer.position.set(0, 0.075, 0.06);
+  hammer.castShadow = true;
+  revolverGroup.add(hammer);
+
+  // Electrical spark discharge / Flash
+  const muzzleFlashGeo = new THREE.SphereGeometry(0.09, 8, 8);
+  const muzzleFlashMat = new THREE.MeshBasicMaterial({ color: 0xffdd44, wireframe: true });
   const muzzleFlash = new THREE.Mesh(muzzleFlashGeo, muzzleFlashMat);
-  muzzleFlash.position.set(0, 0.045, -0.32);
+  muzzleFlash.position.set(0, 0.08, 0.06);
   muzzleFlash.visible = false;
   revolverGroup.add(muzzleFlash);
 
-  const muzzleLight = new THREE.PointLight(0xffaa22, 0, 3);
-  muzzleLight.position.set(0, 0.045, -0.32);
+  const muzzleLight = new THREE.PointLight(0xff6600, 0, 4);
+  muzzleLight.position.set(0, 0.12, 0.06);
   revolverGroup.add(muzzleLight);
 
-  // Sight
-  const sight = new THREE.Mesh(new THREE.BoxGeometry(0.008, 0.014, 0.02), metalMat);
-  sight.position.set(0, 0.075, -0.28);
-  revolverGroup.add(sight);
-
-  // Revolver rests flat on desk initially
-  revolverGroup.rotation.z = Math.PI / 2;
   scene.add(revolverGroup);
 
   // Camera sway and shake state
@@ -884,9 +942,9 @@ export function createScene(container: HTMLElement): SceneContext {
     pushProgress = THREE.MathUtils.clamp(progress, 0, 1);
   }
 
-  // Revolver animation helpers
+  // Console & Switch Animation Helpers
   async function spinRevolver(): Promise<void> {
-    const startRot = cylinderMesh.rotation.z;
+    const startRot = cylinderMesh.rotation.y;
     const extraRot = Math.PI * 12 + Math.random() * Math.PI * 2;
     const duration = 900;
     const startTime = performance.now();
@@ -895,9 +953,15 @@ export function createScene(container: HTMLElement): SceneContext {
       function step() {
         const elapsed = performance.now() - startTime;
         const p = Math.min(1, elapsed / duration);
-        // ease out cubic
         const ease = 1 - Math.pow(1 - p, 3);
-        cylinderMesh.rotation.z = startRot + extraRot * ease;
+        cylinderMesh.rotation.y = startRot + extraRot * ease;
+
+        // Animate chamber LEDs strobing as the rotary dial spins
+        const activeSlot = Math.abs(Math.floor(cylinderMesh.rotation.y / (Math.PI / 3))) % 6;
+        chamberLeds.forEach((led, idx) => {
+          (led.material as THREE.MeshBasicMaterial).color.setHex(idx === activeSlot ? 0xffaa00 : 0x334455);
+        });
+
         if (p < 1) {
           requestAnimationFrame(step);
         } else {
@@ -909,118 +973,119 @@ export function createScene(container: HTMLElement): SceneContext {
   }
 
   async function cockHammer(): Promise<void> {
-    hammer.rotation.x = -0.3; // cocked back
+    // Prime the switch keycap spring
+    hammer.position.y = 0.082;
   }
 
   async function uncockHammer(): Promise<void> {
-    hammer.rotation.x = 0.4; // released forward
+    hammer.position.y = 0.075;
   }
 
   async function fireRecoil(): Promise<void> {
-    // Flash
+    // Fatal Execution: Keycap slams fully down and sparks burst
+    hammer.position.y = 0.052;
     muzzleFlash.visible = true;
-    muzzleLight.intensity = 5;
-    uncockHammer();
+    muzzleLight.color.setHex(0xff3300);
+    muzzleLight.intensity = 8;
 
-    const origRotX = revolverGroup.rotation.x;
-    const origY = revolverGroup.position.y;
-    const origZ = revolverGroup.position.z;
-
-    // Recoil kick up & back
-    revolverGroup.rotation.x += 0.45;
-    revolverGroup.position.y += 0.08;
-    revolverGroup.position.z += (revolverGroup.rotation.y === 0 ? 0.08 : -0.08);
-
-    await new Promise(r => setTimeout(r, 60));
+    await new Promise(r => setTimeout(r, 120));
     muzzleFlash.visible = false;
     muzzleLight.intensity = 0;
-
-    // Recover from recoil
-    const startTime = performance.now();
-    const duration = 250;
-    await new Promise<void>(resolve => {
-      function step() {
-        const elapsed = performance.now() - startTime;
-        const p = Math.min(1, elapsed / duration);
-        revolverGroup.rotation.x = THREE.MathUtils.lerp(revolverGroup.rotation.x, origRotX, p);
-        revolverGroup.position.y = THREE.MathUtils.lerp(revolverGroup.position.y, origY, p);
-        revolverGroup.position.z = THREE.MathUtils.lerp(revolverGroup.position.z, origZ, p);
-        if (p < 1) {
-          requestAnimationFrame(step);
-        } else {
-          resolve();
-        }
-      }
-      step();
-    });
   }
 
   async function clickHammer(): Promise<void> {
-    // Click hammer snap forward with tiny recoil twitch
-    uncockHammer();
-    revolverGroup.position.y += 0.015;
-    await new Promise(r => setTimeout(r, 40));
-    revolverGroup.position.y -= 0.015;
+    // Safe Execution: Keycap slams down with a tactile mechanical click & springs back
+    hammer.position.y = 0.058;
+    muzzleLight.color.setHex(0x33ff66);
+    muzzleLight.intensity = 2.5;
+
+    await new Promise(r => setTimeout(r, 80));
+    hammer.position.y = 0.075;
+    muzzleLight.intensity = 0;
   }
 
   async function aimRevolver(target: 'player' | 'bot' | 'center'): Promise<void> {
-    const startY = revolverGroup.position.y;
-    const startZ = revolverGroup.position.z;
-    const startX = revolverGroup.position.x;
-    const startRotY = revolverGroup.rotation.y;
-    const startRotX = revolverGroup.rotation.x;
-    const startRotZ = revolverGroup.rotation.z;
+    // Animate bot's arm reaching forward to slam the EXEC switch, or camera focus
+    const duration = 450;
+    const startTime = performance.now();
 
-    let targetRotY = 0;
-    let targetRotX = 0;
-    let targetRotZ = Math.PI / 2; // flat on desk by default
-    let targetX = 0;
-    let targetY = 0.98;
-    let targetZ = -0.15;
+    // Start bot arm transforms
+    const startUpperRotX = leftUpperArm.rotation.x;
+    const startUpperRotY = leftUpperArm.rotation.y;
+    const startUpperRotZ = leftUpperArm.rotation.z;
 
-    if (target === 'player') {
-      // Picked up by player: aimed back towards player camera (+Z)
-      targetX = 0;
-      targetY = 1.22;
-      targetZ = 0.7;
-      targetRotY = 0;
-      targetRotX = -0.12;
-      targetRotZ = 0;
+    const startForeX = leftForearm.position.x;
+    const startForeY = leftForearm.position.y;
+    const startForeZ = leftForearm.position.z;
+    const startForeRotX = leftForearm.rotation.x;
+    const startForeRotY = leftForearm.rotation.y;
+
+    const startHandX = leftHand.position.x;
+    const startHandY = leftHand.position.y;
+    const startHandZ = leftHand.position.z;
+    const startHandRotX = leftHand.rotation.x;
+
+    let targetUpperRotX = 0.65;
+    let targetUpperRotY = -0.15;
+    let targetUpperRotZ = 0.1;
+
+    let targetForeX = 0.18;
+    let targetForeY = 0.18;
+    let targetForeZ = 0.44;
+    let targetForeRotX = 1.30;
+    let targetForeRotY = -0.22;
+
+    let targetHandX = 0.08;
+    let targetHandY = 0.065;
+    let targetHandZ = 0.72;
+    let targetHandRotX = 0;
+
+    if (target === 'bot') {
+      // Bot arm lifts from keyboard and hovers directly over the red EXEC switch!
+      targetUpperRotX = 1.05;
+      targetUpperRotY = -0.10;
+      targetUpperRotZ = 0.15;
+
+      targetForeX = 0.12;
+      targetForeY = 0.28;
+      targetForeZ = 0.65;
+      targetForeRotX = 0.65;
+      targetForeRotY = -0.15;
+
+      targetHandX = 0.01;
+      targetHandY = 0.18;
+      targetHandZ = 1.22;
+      targetHandRotX = -0.25;
+
       cockHammer();
-    } else if (target === 'bot') {
-      // Picked up by bot: raised and aimed directly at bot opponent (-Z)
-      targetX = 0;
-      targetY = 1.35;
-      targetZ = -0.85;
-      targetRotY = Math.PI;
-      targetRotX = 0.12;
-      targetRotZ = 0;
+    } else if (target === 'player') {
+      // Player turn: prime the switch
       cockHammer();
     } else {
-      // center rest on desk
-      targetX = 0;
-      targetY = 0.98;
-      targetZ = -0.15;
-      targetRotY = 0;
-      targetRotX = 0;
-      targetRotZ = Math.PI / 2;
+      // Return to resting position on keyboard
+      uncockHammer();
     }
-
-    const duration = 500;
-    const startTime = performance.now();
 
     return new Promise(resolve => {
       function step() {
         const elapsed = performance.now() - startTime;
         const p = Math.min(1, elapsed / duration);
-        const ease = 1 - Math.pow(1 - p, 3); // smooth cubic ease out
+        const ease = 1 - Math.pow(1 - p, 3);
 
-        revolverGroup.position.x = THREE.MathUtils.lerp(startX, targetX, ease);
-        revolverGroup.position.y = THREE.MathUtils.lerp(startY, targetY, ease);
-        revolverGroup.position.z = THREE.MathUtils.lerp(startZ, targetZ, ease);
-        revolverGroup.rotation.y = THREE.MathUtils.lerp(startRotY, targetRotY, ease);
-        revolverGroup.rotation.x = THREE.MathUtils.lerp(startRotX, targetRotX, ease);
-        revolverGroup.rotation.z = THREE.MathUtils.lerp(startRotZ, targetRotZ, ease);
+        leftUpperArm.rotation.x = THREE.MathUtils.lerp(startUpperRotX, targetUpperRotX, ease);
+        leftUpperArm.rotation.y = THREE.MathUtils.lerp(startUpperRotY, targetUpperRotY, ease);
+        leftUpperArm.rotation.z = THREE.MathUtils.lerp(startUpperRotZ, targetUpperRotZ, ease);
+
+        leftForearm.position.x = THREE.MathUtils.lerp(startForeX, targetForeX, ease);
+        leftForearm.position.y = THREE.MathUtils.lerp(startForeY, targetForeY, ease);
+        leftForearm.position.z = THREE.MathUtils.lerp(startForeZ, targetForeZ, ease);
+        leftForearm.rotation.x = THREE.MathUtils.lerp(startForeRotX, targetForeRotX, ease);
+        leftForearm.rotation.y = THREE.MathUtils.lerp(startForeRotY, targetForeRotY, ease);
+
+        leftHand.position.x = THREE.MathUtils.lerp(startHandX, targetHandX, ease);
+        leftHand.position.y = THREE.MathUtils.lerp(startHandY, targetHandY, ease);
+        leftHand.position.z = THREE.MathUtils.lerp(startHandZ, targetHandZ, ease);
+        leftHand.rotation.x = THREE.MathUtils.lerp(startHandRotX, targetHandRotX, ease);
 
         if (p < 1) {
           requestAnimationFrame(step);

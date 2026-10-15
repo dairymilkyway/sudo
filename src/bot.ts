@@ -11,16 +11,18 @@ const TRASH_TALK_LINES: string[] = [
   'Have you tried turning it off and on again?',
   'I would uninstall myself but I am Windows.',
   'Nice uptime. Shame about the next 5 seconds.',
-  'Imagine compiling your kernel just to pull a trigger.',
+  'Imagine compiling your kernel just to watch it get wiped.',
   'At least my blue screen has a cute smiley face :(',
   'Are you running as root? Because you are about to get owned.',
   'Registry error: user bravery not found.',
-  'Wait, let me configure Windows Update before I pull...',
-  'pacman -Syu cannot save your cylinder position.',
+  'Wait, let me configure Windows Update before I execute...',
+  'pacman -Syu cannot save your boot sector.',
   'Enjoy your man pages in the afterlife, tux boy.',
-  'Cortana predicted a 100% chance of kernel failure.',
-  'Segment fault (chamber dumped).',
-  'Did you forget to chmod +x your survival script?'
+  'Cortana predicted a 100% chance of system wipe.',
+  'Segmentation fault (core dumped, pride destroyed).',
+  'Did you forget to chmod +x your survival script?',
+  'Pushing straight to production on a Friday afternoon.',
+  'One clack away from an emergency kernel panic.'
 ];
 
 export class BotAI {
@@ -36,8 +38,8 @@ export class BotAI {
     const delayMs = Math.floor(800 + Math.random() * 1000); // 800 - 1800ms
 
     const reasoning = action === 'spin'
-      ? `[DECISION] Probability of bullet is ${(spinProbability * 100).toFixed(1)}%. Initiating chamber spin...`
-      : `[DECISION] Odds favorable (${((1 - spinProbability) * 100).toFixed(1)}% safe). Pulling trigger directly.`;
+      ? `[DECISION] Risk of fatal payload is ${(spinProbability * 100).toFixed(1)}%. Re-rolling rotary dial...`
+      : `[DECISION] Odds favorable (${((1 - spinProbability) * 100).toFixed(1)}% safe). Slamming EXEC switch directly.`;
 
     // 40% chance of trash talk line
     let trashTalk: string | undefined;

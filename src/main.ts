@@ -41,12 +41,12 @@ sceneContext.setMonitorTextures(playerTerminal.getTexture(), botTerminal.getText
 function initTerminals() {
   playerTerminal.clear();
   playerTerminal.addLine('Kernel Roulette v1.0.0 (tty1)');
-  playerTerminal.addLine('System ready. 6 chambers, 1 bullet.');
+  playerTerminal.addLine('Arbiter online. 6 execution slots, 1 fatal root payload.');
 
   botTerminal.clear();
   botTerminal.addLine('Microsoft Windows [Version 10.0.19045.3803]');
   botTerminal.addLine('(c) Microsoft Corporation. All rights reserved.');
-  botTerminal.addLine('WinDefend: Low probability threat detected.');
+  botTerminal.addLine('WinDefend: Dual-Boot Arbiter connected on COM3.');
 }
 
 initTerminals();
@@ -114,23 +114,23 @@ async function handleAction(actor: 'player' | 'bot', action: ActionType) {
   const terminal = actor === 'player' ? playerTerminal : botTerminal;
 
   if (action === 'spin') {
-    terminal.addLine(`[ACTION] Spinning chamber cylinder...`);
+    terminal.addLine(`[ACTION] Re-indexing rotary payload dial...`);
     soundFX.playSpin();
     await sceneContext.spinRevolver();
   }
 
-  // Aim revolver at the active actor
+  // Aim switch / focus on the active actor
   await sceneContext.aimRevolver(actor);
   sceneContext.setCameraPush(0.5);
 
   const result = engine.executeAction(action);
 
   if (result.isBullet) {
-    terminal.addLine(`BANG! Bullet fired in chamber #${result.chamber + 1}!`);
+    terminal.addLine(`*BOOM!* [FATAL DISCHARGE]: Slot #${result.chamber + 1} EXECUTED!`);
     sceneContext.setCameraShake(0.12);
     updateHUD();
 
-    // Trigger visual muzzle flash & weapon recoil kick
+    // Trigger visual switch depression & electrical spark flash
     await sceneContext.fireRecoil();
 
     setTimeout(() => {
@@ -146,10 +146,10 @@ async function handleAction(actor: 'player' | 'bot', action: ActionType) {
       await deathManager.triggerWindowsDeath();
     }
   } else {
-    // Click: empty chamber survived
+    // Safe execution: tactile mechanical switch click & dry-run log
     soundFX.playEmptyClick();
     await sceneContext.clickHammer();
-    terminal.addLine(`*click* (Chamber #${result.chamber + 1} empty).`);
+    terminal.addLine(`*CLACK* [DRY-RUN]: Slot #${result.chamber + 1} safe. Zero byte corruption.`);
     sceneContext.setCameraShake(0.02);
     updateHUD();
 

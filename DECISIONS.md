@@ -62,6 +62,21 @@
   - Ergonomic gaming mouse with scroll wheel and glowing RGB LED strip.
 - Positioned the bot's hands and arms so their right hand rests naturally on their mouse and their left hand rests on their keyboard.
 
+## Enhancement: The Dual-Boot Arbiter Console (Hacker Russian Roulette)
+- Replaced the firearm revolver with an authentic, relatable computer/hacker game mechanic: **The Dual-Boot Arbiter Console** ("Push to Production / Sudo Roulette").
+- In the center of the desk sits an industrial server-grade arbiter console with heavy braided conduits hardwired into both the Arch Linux rig and the Windows machine:
+  - 6-LED rotary execution dial representing 6 execution slots (5 safe dry-runs, 1 fatal root purge).
+  - Giant illuminated red emergency mechanical switch labeled `[ EXEC / SUDO ]`.
+  - Status indicator plates for both machines (`LINUX (ROOT)` with green LED, `WINDOWS (SYSTEM)` with blue LED).
+- On SPIN (`SPIN & EXEC`): Stepper motor sounds ratchet as the rotary dial spins and the 6 chamber LEDs strobe, re-randomizing the payload index.
+- On EXECUTE:
+  - The actor lifts their hand and slams the giant clacky mechanical switch down.
+  - Safe execution: Tactile switch bottom-out `*CLACK*`, green safe flash, zero byte corruption, turn advances.
+  - Fatal execution: High-voltage electrical arc explosion `*BOOM*`, spark bursts, console red flash, triggering the OS wipe sequence (`sudo rm -rf /*` -> Kernel Panic vs `del /f /s /q C:\*` -> BSOD).
+- Bot animation: The Windows opponent lifts his left arm off the keyboard, hovers his hand directly over the big red button while delivering trash talk, and slams it down with physical impact.
+- Audio synthesis: Tuned WebAudio oscillators for heavy tactile switch buckling spring snaps, stepper motor dial ticks, and capacitor arc blowouts.
+
+
 
 
 
