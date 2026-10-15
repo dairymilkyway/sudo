@@ -9,9 +9,9 @@ html, body {
   width: 100%;
   height: 100%;
   overflow: hidden;
-  background-color: #05070d;
-  font-family: 'Courier New', Courier, monospace;
-  color: #fff;
+  background-color: #04060a;
+  font-family: 'Courier New', 'Consolas', monospace;
+  color: #e2e8f0;
 }
 
 #app {
@@ -29,16 +29,502 @@ html, body {
   width: 100%;
   height: 100%;
   pointer-events: none;
-  background: radial-gradient(circle at center, transparent 60%, rgba(0, 0, 0, 0.75) 100%),
-              repeating-linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%);
+  background: radial-gradient(circle at center, transparent 55%, rgba(0, 0, 0, 0.8) 100%),
+              repeating-linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.28) 50%);
   background-size: 100% 100%, 100% 4px;
   z-index: 5;
 }
 
-/* Game HUD */
-#hud {
+/* Machined Countersunk Hex Bolt Rivets */
+.hex-bolt {
   position: absolute;
-  bottom: 30px;
+  width: 10px;
+  height: 10px;
+  background: radial-gradient(circle at 35% 35%, #556677 0%, #202a36 60%, #111620 100%);
+  border-radius: 50%;
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.35), 0 1px 2px rgba(0, 0, 0, 0.8);
+  z-index: 12;
+}
+
+.hex-bolt::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 4px;
+  height: 4px;
+  background: #0d121a;
+  clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+}
+
+.hex-bolt.top-left { top: 7px; left: 7px; }
+.hex-bolt.top-right { top: 7px; right: 7px; }
+.hex-bolt.bottom-left { bottom: 7px; left: 7px; }
+.hex-bolt.bottom-right { bottom: 7px; right: 7px; }
+
+/* Status LED Indicators */
+.led-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+  background: #334155;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.6);
+  transition: all 0.3s ease;
+}
+
+.led-dot.green {
+  background: #33ff66;
+  box-shadow: 0 0 8px #33ff66, 0 0 14px rgba(51, 255, 102, 0.6);
+}
+
+.led-dot.blue {
+  background: #00a4ef;
+  box-shadow: 0 0 8px #00a4ef, 0 0 14px rgba(0, 164, 239, 0.6);
+}
+
+.led-dot.amber {
+  background: #f59e0b;
+  box-shadow: 0 0 8px #f59e0b, 0 0 14px rgba(245, 158, 11, 0.6);
+}
+
+.led-dot.red {
+  background: #ef4444;
+  box-shadow: 0 0 8px #ef4444, 0 0 14px rgba(239, 68, 68, 0.6);
+}
+
+/* ==========================================================================
+   1. COLD-BOOT BIOS / BOOTLOADER MAIN MENU
+   ========================================================================== */
+.main-menu-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(3, 5, 8, 0.88);
+  backdrop-filter: blur(8px);
+  padding: 24px;
+}
+
+.bios-chassis {
+  position: relative;
+  width: 880px;
+  max-width: 95vw;
+  background: linear-gradient(180deg, #121822 0%, #0a0e14 100%);
+  border: 1px solid #2b394d;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.9),
+              inset 0 1px 0 rgba(255, 255, 255, 0.12),
+              0 0 40px rgba(0, 0, 0, 0.7);
+  padding: 32px 36px;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.bios-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #1f2a3a;
+  padding-bottom: 12px;
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  color: #64748b;
+}
+
+.bios-id {
+  color: #94a3b8;
+  font-weight: bold;
+}
+
+.bios-diag {
+  color: #38bdf8;
+}
+
+.bios-title-block {
+  text-align: center;
+  padding: 4px 0;
+}
+
+.glitch-title {
+  font-size: 44px;
+  font-weight: 900;
+  letter-spacing: 6px;
+  color: #f8fafc;
+  text-shadow: 0 0 20px rgba(255, 255, 255, 0.2), 0 2px 0 #000;
+  margin-bottom: 6px;
+}
+
+.bios-subtitle {
+  font-size: 12px;
+  letter-spacing: 3px;
+  color: #94a3b8;
+  text-transform: uppercase;
+}
+
+.partition-selection-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.section-label {
+  font-size: 11px;
+  letter-spacing: 2px;
+  color: #718096;
+  text-transform: uppercase;
+  border-left: 3px solid #38bdf8;
+  padding-left: 8px;
+}
+
+.partition-cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.partition-card {
+  position: relative;
+  background: #0d121a;
+  border: 1px solid #202b3a;
+  padding: 20px;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.partition-card:hover {
+  background: #111722;
+  border-color: #38bdf8;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+}
+
+.partition-card.active {
+  background: #111926;
+  border-color: #38bdf8;
+  box-shadow: inset 0 0 16px rgba(56, 189, 248, 0.12), 0 0 20px rgba(0, 0, 0, 0.7);
+}
+
+#card-linux.active {
+  border-color: #33ff66;
+  box-shadow: inset 0 0 16px rgba(51, 255, 102, 0.12), 0 0 24px rgba(51, 255, 102, 0.2);
+}
+
+#card-windows.active {
+  border-color: #00a4ef;
+  box-shadow: inset 0 0 16px rgba(0, 164, 239, 0.12), 0 0 24px rgba(0, 164, 239, 0.2);
+}
+
+.card-indicator {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.part-tag {
+  font-size: 11px;
+  color: #64748b;
+  letter-spacing: 1px;
+}
+
+.fs-badge {
+  margin-left: auto;
+  font-size: 10px;
+  background: #1a2230;
+  padding: 2px 6px;
+  border-radius: 2px;
+  color: #94a3b8;
+  font-weight: bold;
+}
+
+.card-os-title {
+  font-size: 22px;
+  font-weight: bold;
+  letter-spacing: 2px;
+  color: #f1f5f9;
+}
+
+#card-linux .card-os-title { color: #33ff66; }
+#card-windows .card-os-title { color: #00a4ef; }
+
+.card-role {
+  font-size: 12px;
+  color: #94a3b8;
+  letter-spacing: 1px;
+}
+
+.card-specs {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 11px;
+  color: #64748b;
+  border-top: 1px solid #1a2332;
+  padding-top: 10px;
+}
+
+.spec-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.spec-row strong {
+  color: #cbd5e1;
+}
+
+.cmd-preview {
+  background: #080a0e;
+  padding: 2px 6px;
+  border: 1px solid #1c2533;
+  color: #f59e0b;
+  font-family: monospace;
+  font-size: 10px;
+}
+
+.card-selection-pill {
+  margin-top: 4px;
+  font-size: 10px;
+  font-weight: bold;
+  letter-spacing: 1.5px;
+  text-align: center;
+  padding: 6px;
+  background: #16202e;
+  border: 1px solid #263548;
+  color: #64748b;
+  text-transform: uppercase;
+}
+
+.partition-card.active .card-selection-pill {
+  background: #1e293b;
+  color: #f8fafc;
+  border-color: #475569;
+}
+
+#card-linux.active .card-selection-pill {
+  background: rgba(51, 255, 102, 0.12);
+  color: #33ff66;
+  border-color: #33ff66;
+}
+
+#card-windows.active .card-selection-pill {
+  background: rgba(0, 164, 239, 0.12);
+  color: #00a4ef;
+  border-color: #00a4ef;
+}
+
+.bios-footer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  border-top: 1px solid #1f2a3a;
+  padding-top: 18px;
+}
+
+.btn-bios-boot {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  width: 100%;
+  max-width: 440px;
+  padding: 14px 28px;
+  background: linear-gradient(180deg, #1e2a3a 0%, #111722 100%);
+  border: 1px solid #3b4e68;
+  color: #f8fafc;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: bold;
+  letter-spacing: 2px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+.btn-hazard-pattern {
+  width: 24px;
+  height: 100%;
+  background: repeating-linear-gradient(
+    -45deg,
+    #f59e0b,
+    #f59e0b 6px,
+    #111827 6px,
+    #111827 12px
+  );
+  opacity: 0.7;
+}
+
+.btn-bios-boot:hover {
+  background: linear-gradient(180deg, #2b3b50 0%, #16202e 100%);
+  border-color: #38bdf8;
+  color: #38bdf8;
+  box-shadow: 0 0 20px rgba(56, 189, 248, 0.35);
+  transform: translateY(-2px);
+}
+
+.btn-bios-boot:active {
+  transform: translateY(1px);
+}
+
+.bios-hotkeys {
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  color: #64748b;
+}
+
+.bios-hotkeys strong {
+  color: #94a3b8;
+}
+
+/* ==========================================================================
+   2. MACHINED RACKMOUNT SERVER TELEMETRY HUD (TOP)
+   ========================================================================== */
+.rackmount-telemetry {
+  position: absolute;
+  top: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 900px;
+  max-width: 95vw;
+  background: linear-gradient(180deg, #141a24 0%, #0b0f16 100%);
+  border: 1px solid #283446;
+  padding: 10px 24px;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.8),
+              inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.telemetry-bay {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.telemetry-bay.bay-left {
+  align-items: flex-start;
+}
+
+.telemetry-bay.bay-right {
+  align-items: flex-end;
+}
+
+.telemetry-bay.bay-center {
+  align-items: center;
+  border-left: 1px solid #1e2634;
+  border-right: 1px solid #1e2634;
+  padding: 0 24px;
+}
+
+.bay-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  font-weight: bold;
+}
+
+.bay-tag {
+  color: #64748b;
+  font-size: 10px;
+}
+
+.bay-os {
+  color: #f1f5f9;
+}
+
+/* 7-Segment Nixie Counter */
+.nixie-tally {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.nixie-label {
+  font-size: 9px;
+  letter-spacing: 1.5px;
+  color: #64748b;
+}
+
+.nixie-counter {
+  position: relative;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 26px;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: 3px;
+  background: #06090e;
+  padding: 2px 8px;
+  border: 1px solid #1a2330;
+  border-radius: 2px;
+}
+
+.nixie-counter .ghost {
+  color: rgba(255, 255, 255, 0.05);
+}
+
+.nixie-counter .val {
+  position: absolute;
+  top: 2px;
+  left: 8px;
+  color: #33ff66;
+  text-shadow: 0 0 10px rgba(51, 255, 102, 0.7);
+}
+
+#bay-bot .nixie-counter .val {
+  color: #00a4ef;
+  text-shadow: 0 0 10px rgba(0, 164, 239, 0.7);
+}
+
+.protocol-title {
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: #64748b;
+  font-weight: bold;
+}
+
+.protocol-readout {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 11px;
+  color: #94a3b8;
+  letter-spacing: 1px;
+}
+
+.protocol-readout strong {
+  color: #f59e0b;
+}
+
+.sync-status {
+  color: #38bdf8 !important;
+}
+
+.readout-divider {
+  color: #334155;
+}
+
+/* ==========================================================================
+   3. MACHINED RACKMOUNT BOTTOM HUD & ACTION CONTROLS
+   ========================================================================== */
+.rackmount-hud {
+  position: absolute;
+  bottom: 24px;
   left: 50%;
   transform: translateX(-50%);
   z-index: 10;
@@ -46,259 +532,394 @@ html, body {
   flex-direction: column;
   align-items: center;
   gap: 14px;
-  background: rgba(10, 15, 24, 0.85);
-  border: 1px solid #1f2d42;
-  border-radius: 8px;
-  padding: 16px 28px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.8), 0 0 15px rgba(51, 255, 102, 0.15);
-  backdrop-filter: blur(4px);
+  width: 720px;
+  max-width: 95vw;
+  background: linear-gradient(180deg, #141a24 0%, #0b0f16 100%);
+  border: 1px solid #283446;
+  padding: 18px 24px;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.85),
+              inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
-.turn-indicator {
-  font-size: 14px;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  color: #8899aa;
-}
-
-.turn-indicator span {
-  font-weight: bold;
-}
-
-.turn-indicator .player-turn {
-  color: #33ff66;
-  text-shadow: 0 0 8px rgba(51, 255, 102, 0.6);
-}
-
-.turn-indicator .bot-turn {
-  color: #00a4ef;
-  text-shadow: 0 0 8px rgba(0, 164, 239, 0.6);
-}
-
-/* 6-Chamber Indicator */
-.chamber-slots {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-}
-
-.slot {
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  border: 2px solid #334455;
-  background: #111a24;
+/* Status Annunciator Pill */
+.annunciator-pill {
   position: relative;
-  transition: all 0.3s ease;
-}
-
-.slot.current {
-  border-color: #33ff66;
-  box-shadow: 0 0 10px #33ff66;
-  transform: scale(1.2);
-}
-
-.slot.checked {
-  background: #2a3b4c;
-  border-color: #445566;
-}
-
-.slot.checked::after {
-  content: '✕';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  font-size: 11px;
-  color: #ff4444;
-  font-weight: bold;
-}
-
-/* Action Buttons */
-.hud-actions {
+  overflow: hidden;
   display: flex;
-  gap: 16px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  background: #080c12;
+  border: 1px solid #1f2a3a;
+  padding: 8px 14px;
 }
 
-.btn-action {
-  background: #152233;
-  color: #e2e8f0;
-  border: 1px solid #3b506d;
-  padding: 10px 24px;
-  font-family: inherit;
-  font-size: 14px;
+.annunciator-pill .hazard-stripe {
+  width: 32px;
+  height: 12px;
+  background: repeating-linear-gradient(
+    -45deg,
+    #f59e0b,
+    #f59e0b 4px,
+    #0f172a 4px,
+    #0f172a 8px
+  );
+  opacity: 0.85;
+}
+
+.annunciator-text {
+  font-size: 12px;
+  letter-spacing: 2px;
   font-weight: bold;
-  letter-spacing: 1px;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  min-width: 110px;
+  text-transform: uppercase;
+  color: #33ff66;
+  text-shadow: 0 0 10px rgba(51, 255, 102, 0.5);
 }
 
-.btn-action:hover:not(:disabled) {
-  background: #203552;
-  border-color: #33ff66;
-  color: #33ff66;
-  box-shadow: 0 0 12px rgba(51, 255, 102, 0.3);
+.annunciator-text.bot-active {
+  color: #00a4ef;
+  text-shadow: 0 0 10px rgba(0, 164, 239, 0.5);
+}
+
+.annunciator-text.resolving {
+  color: #f59e0b;
+  text-shadow: 0 0 10px rgba(245, 158, 11, 0.5);
+}
+
+/* 6 Engraved Hardware Chamber Bays */
+.chamber-matrix {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+  justify-content: center;
+}
+
+.chamber-bay {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  width: 80px;
+  height: 48px;
+  background: #090d14;
+  border: 1px solid #1e2634;
+  border-radius: 3px;
+  transition: all 0.25s ease;
+}
+
+.bay-id {
+  font-size: 11px;
+  font-weight: bold;
+  color: #64748b;
+  letter-spacing: 1px;
+}
+
+.bay-state {
+  font-size: 9px;
+  letter-spacing: 1px;
+  color: #475569;
+}
+
+.chamber-bay.active {
+  border-color: #f59e0b;
+  background: #14130a;
+  box-shadow: 0 0 12px rgba(245, 158, 11, 0.35);
   transform: translateY(-2px);
 }
 
-.btn-action:active:not(:disabled) {
-  transform: translateY(0);
+.chamber-bay.active .bay-id {
+  color: #f59e0b;
 }
 
-.btn-action:disabled {
+.chamber-bay.active .bay-state {
+  color: #fbbf24;
+  font-weight: bold;
+}
+
+.chamber-bay.checked {
+  background: #07090d;
+  border-color: #17202c;
+  opacity: 0.65;
+}
+
+.chamber-bay.checked .bay-id {
+  color: #334155;
+  text-decoration: line-through;
+}
+
+.chamber-bay.checked .bay-state {
+  color: #10b981;
+}
+
+/* Heavy Tactical Action Switches */
+.hud-actions {
+  display: flex;
+  gap: 16px;
+  width: 100%;
+  justify-content: center;
+}
+
+.btn-tactical {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+  border: 1px solid #334155;
+  color: #e2e8f0;
+  padding: 12px 28px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: bold;
+  letter-spacing: 1.5px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  min-width: 180px;
+}
+
+.btn-tactical.btn-exec {
+  border-color: #475569;
+  background: linear-gradient(180deg, #2a1b1b 0%, #150d0d 100%);
+  color: #fca5a5;
+}
+
+.btn-hazard-edge {
+  width: 8px;
+  height: 100%;
+  background: repeating-linear-gradient(
+    -45deg,
+    #ef4444,
+    #ef4444 3px,
+    #18181b 3px,
+    #18181b 6px
+  );
+  opacity: 0.8;
+}
+
+.btn-tactical.btn-exec:hover:not(:disabled) {
+  background: linear-gradient(180deg, #3d1f1f 0%, #1e1111 100%);
+  border-color: #ef4444;
+  color: #ffffff;
+  box-shadow: 0 0 20px rgba(239, 68, 68, 0.4);
+  transform: translateY(-2px);
+}
+
+.btn-tactical.btn-spin:hover:not(:disabled) {
+  background: linear-gradient(180deg, #2b394f 0%, #131b26 100%);
+  border-color: #38bdf8;
+  color: #38bdf8;
+  box-shadow: 0 0 16px rgba(56, 189, 248, 0.35);
+  transform: translateY(-2px);
+}
+
+.btn-tactical:active:not(:disabled) {
+  transform: translateY(2px);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.9);
+}
+
+.btn-tactical:disabled {
   opacity: 0.35;
   cursor: not-allowed;
-  border-color: #223040;
+  border-color: #1e293b;
+  box-shadow: none;
 }
 
-/* Scoreboard header */
-#scoreboard {
-  position: absolute;
-  top: 20px;
-  left: 20px;
-  z-index: 10;
-  display: flex;
-  gap: 20px;
-  font-size: 13px;
-  background: rgba(10, 15, 24, 0.7);
-  padding: 8px 16px;
-  border-radius: 4px;
-  border: 1px solid #1c2636;
-  letter-spacing: 1px;
+.btn-spin-icon {
+  font-size: 16px;
+  font-weight: bold;
 }
 
-#scoreboard .p-score {
-  color: #33ff66;
-}
+/* ==========================================================================
+   4. CINEMA-GRADE DEATH & RECOVERY ANIMATIONS (ZERO VIBE-CODED FLUFF)
+   ========================================================================== */
 
-#scoreboard .b-score {
-  color: #00a4ef;
-}
-
-/* Linux Wipe & Desktop Disintegration Overlay */
-.linux-wipe-overlay {
+/* Analog CRT Raster Collapse Overlay */
+.crt-raster-collapse-screen {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  z-index: 50;
-  background: #1e1e2e;
-  animation: glitch-anim 0.2s infinite;
-  display: flex;
-  flex-direction: column;
+  z-index: 60;
+  background: rgba(0, 0, 0, 0.94);
+  overflow: hidden;
+  animation: crt-fade-black 1.2s forwards;
 }
 
-.fake-desktop {
-  width: 100%;
-  height: 100%;
-  position: relative;
-  background: #181825;
-  padding: 30px;
-}
-
-.fake-desktop .icons {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-}
-
-.fake-desktop .icon {
-  font-size: 16px;
-  color: #cdd6f4;
-  transition: all 0.2s ease;
-  width: 100px;
-}
-
-.fake-desktop .taskbar {
+.raster-beam-slit {
   position: absolute;
-  bottom: 0;
+  top: 50%;
   left: 0;
   width: 100%;
-  height: 40px;
-  background: #11111b;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0 16px;
-  border-top: 1px solid #313244;
+  height: 100%;
+  background: #ffffff;
+  box-shadow: 0 0 30px #ffffff, 0 0 60px #38bdf8;
+  transform: translateY(-50%) scaleY(1);
+  animation: raster-collapse 1.1s cubic-bezier(0.85, 0, 0.15, 1) forwards;
 }
 
-@keyframes glitch-anim {
-  0% { transform: translate(0, 0); }
-  25% { transform: translate(-2px, 3px); filter: hue-rotate(90deg); }
-  50% { transform: translate(3px, -1px); filter: invert(0.2); }
-  75% { transform: translate(-3px, -2px); }
-  100% { transform: translate(1px, 2px); }
+.raster-chroma-tear {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(255, 0, 0, 0.15) 0px,
+    rgba(0, 255, 0, 0.15) 3px,
+    rgba(0, 0, 255, 0.15) 6px
+  );
+  animation: chroma-tear 0.1s infinite;
 }
 
-/* Kernel Panic Black Screen Overlay */
+@keyframes raster-collapse {
+  0% {
+    transform: translateY(-50%) scaleY(1) scaleX(1);
+    opacity: 1;
+  }
+  50% {
+    transform: translateY(-50%) scaleY(0.003) scaleX(1);
+    opacity: 1;
+  }
+  80% {
+    transform: translateY(-50%) scaleY(0.003) scaleX(0.004);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-50%) scaleY(0) scaleX(0);
+    opacity: 0;
+  }
+}
+
+@keyframes crt-fade-black {
+  0% { background: rgba(0, 0, 0, 0.4); }
+  70% { background: rgba(0, 0, 0, 0.95); }
+  100% { background: #000000; }
+}
+
+@keyframes chroma-tear {
+  0% { transform: translateY(0); }
+  50% { transform: translateY(-3px) scaleX(1.02); }
+  100% { transform: translateY(2px) scaleX(0.99); }
+}
+
+/* Linux Kernel Panic Overlay */
 .kernel-panic-screen {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  z-index: 100;
-  background: #000000;
-  color: #ffffff;
-  padding: 30px;
-  overflow-y: auto;
+  z-index: 70;
+  background: #020202;
+  color: #f1f5f9;
+  padding: 40px 60px;
   font-family: 'Courier New', Courier, monospace;
-  font-size: 15px;
+  font-size: 13px;
   line-height: 1.5;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
-.panic-content p {
-  margin: 3px 0;
-  white-space: pre-wrap;
+.panic-content {
+  max-width: 880px;
+  margin: 0 auto;
+}
+
+.panic-header {
+  color: #ef4444;
+  font-weight: bold;
 }
 
 .grub-prompt {
-  color: #ffffff;
-  font-size: 16px;
+  background: #080a0e;
+  border: 1px solid #1f2a3a;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
-.grub-prompt .input-line {
+.input-line {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-top: 10px;
 }
 
-.grub-prompt input {
+.grub-tag {
+  color: #38bdf8;
+  font-weight: bold;
+}
+
+#grub-input {
   background: transparent;
   border: none;
-  color: #ffffff;
-  font-family: inherit;
-  font-size: 16px;
   outline: none;
-  caret-color: #ffffff;
+  color: #33ff66;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: bold;
   flex: 1;
 }
 
-.grub-prompt .hint {
-  margin-top: 15px;
-  font-size: 13px;
-  color: #888888;
+.grub-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 6px;
 }
 
-.grub-prompt .hint span {
-  color: #33ff66;
-  text-decoration: underline;
+.btn-diegetic {
+  background: #141b24;
+  border: 1px solid #28374a;
+  color: #e2e8f0;
+  padding: 8px 18px;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: bold;
+  letter-spacing: 1px;
   cursor: pointer;
+  transition: all 0.2s ease;
 }
 
-/* Windows BSOD Overlay */
+.btn-diegetic:hover {
+  background: #1e293b;
+  border-color: #38bdf8;
+  color: #38bdf8;
+}
+
+.btn-diegetic.primary {
+  background: #1e293b;
+  border-color: #38bdf8;
+  color: #38bdf8;
+}
+
+.btn-diegetic.primary:hover {
+  background: #253347;
+  color: #ffffff;
+}
+
+.hint {
+  font-size: 11px;
+  color: #64748b;
+}
+
+.hint strong {
+  color: #38bdf8;
+}
+
+/* Windows 11 BSOD Screen */
 .bsod-screen {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  z-index: 100;
+  z-index: 70;
   background-color: #0078d7;
   color: #ffffff;
   padding: 8vw 12vw;
@@ -309,35 +930,35 @@ html, body {
 }
 
 .bsod-content .frowny {
-  font-size: 90px;
+  font-size: 85px;
   line-height: 1;
-  margin-bottom: 24px;
+  margin-bottom: 22px;
 }
 
 .bsod-content .bsod-title {
-  font-size: 26px;
+  font-size: 24px;
   font-weight: 300;
-  max-width: 800px;
+  max-width: 780px;
   line-height: 1.4;
   margin-bottom: 20px;
 }
 
 .bsod-content .bsod-percent {
-  font-size: 24px;
+  font-size: 22px;
   font-weight: 400;
-  margin-bottom: 35px;
+  margin-bottom: 30px;
 }
 
 .bsod-details {
   display: flex;
   align-items: center;
-  gap: 25px;
+  gap: 24px;
 }
 
 .qr-mock {
-  width: 80px;
-  height: 80px;
-  background: repeating-conic-gradient(#ffffff 0% 25%, #0078d7 0% 50%) 50% / 16px 16px;
+  width: 76px;
+  height: 76px;
+  background: repeating-conic-gradient(#ffffff 0% 25%, #0078d7 0% 50%) 50% / 14px 14px;
   border: 4px solid #ffffff;
 }
 
@@ -347,40 +968,87 @@ html, body {
   color: #e5f1fb;
 }
 
-.victory-banner {
-  margin-top: 40px;
-  background: rgba(0, 0, 0, 0.4);
+.bsod-actions-panel {
+  margin-top: 32px;
+}
+
+/* Diegetic Victory Telemetry Card */
+.telemetry-victory-screen {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 65;
+  background: rgba(3, 6, 10, 0.85);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.telemetry-panel {
+  width: 580px;
+  max-width: 90vw;
+  background: linear-gradient(180deg, #131a26 0%, #0a0e16 100%);
+  border: 1px solid #2b3a4e;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.9),
+              inset 0 1px 0 rgba(255, 255, 255, 0.12);
   padding: 24px;
-  border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  max-width: 480px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 16px;
 }
 
-.victory-banner h2 {
-  font-size: 28px;
-  color: #33ff66;
+.telemetry-panel.danger {
+  border-color: #ef4444;
+}
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 11px;
+  font-weight: bold;
+  letter-spacing: 1.5px;
+  color: #94a3b8;
+  border-bottom: 1px solid #1f2a3a;
+  padding-bottom: 10px;
+}
+
+.panel-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.panel-body h2 {
+  font-size: 22px;
   letter-spacing: 2px;
+  color: #33ff66;
 }
 
-.victory-banner p {
-  font-size: 14px;
-  color: #ffffff;
+.telemetry-panel.danger .panel-body h2 {
+  color: #ef4444;
 }
 
-.victory-banner .btn-action {
-  align-self: flex-start;
-  margin-top: 10px;
-  background: #33ff66;
-  color: #05070d;
-  border: none;
+.panel-body p {
+  font-size: 13px;
+  color: #cbd5e1;
+  line-height: 1.5;
 }
 
-.victory-banner .btn-action:hover {
-  background: #5cff85;
-  color: #000;
+.stats-line {
+  font-size: 12px;
+  color: #64748b;
 }
 
+.stats-line strong {
+  color: #f59e0b;
+}
 
+.telemetry-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 12px;
+}

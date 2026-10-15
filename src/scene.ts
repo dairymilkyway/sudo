@@ -16,10 +16,11 @@ export interface SceneContext {
   aimRevolver: (target: 'player' | 'bot' | 'center') => Promise<void>;
   fireRecoil: () => Promise<void>;
   clickHammer: () => Promise<void>;
-  setOpponentDefeated: (defeated: boolean) => void;
+  setOpponentDefeated: (defeated: boolean, botOS?: 'windows' | 'linux') => void;
   zoomConsole: (zoomIn: boolean, durationMs?: number) => Promise<void>;
   animatePlayerAction: () => Promise<void>;
   retractPlayerArm: () => Promise<void>;
+  configureScene: (playerOS: 'linux' | 'windows') => void;
 }
 
 export function createScene(container: HTMLElement): SceneContext {
@@ -361,7 +362,10 @@ export function createScene(container: HTMLElement): SceneContext {
     faceCanvas.height = 512;
     const fCtx = faceCanvas.getContext('2d')!;
 
-    function drawFace(eyesClosed: boolean) {
+    let currentFaceOS: 'windows' | 'linux' = 'windows';
+
+    function drawFace(eyesClosed: boolean, osType: 'windows' | 'linux' = currentFaceOS) {
+      currentFaceOS = osType;
       fCtx.clearRect(0, 0, 512, 512);
 
       // Warm natural skin base gradient
@@ -385,15 +389,15 @@ export function createScene(container: HTMLElement): SceneContext {
       fCtx.ellipse(256, 420, 160, 70, 0, 0, Math.PI);
       fCtx.fill();
 
-      // 5 o'clock shadow / stubble
-      fCtx.fillStyle = 'rgba(60, 45, 35, 0.18)';
+      // 5 o'clock shadow / stubble (heavier for hacker)
+      fCtx.fillStyle = osType === 'linux' ? 'rgba(40, 35, 30, 0.28)' : 'rgba(60, 45, 35, 0.18)';
       fCtx.beginPath();
-      fCtx.ellipse(256, 385, 115, 80, 0, 0, Math.PI);
+      fCtx.ellipse(256, 385, 120, 85, 0, 0, Math.PI);
       fCtx.fill();
 
       // Eyebrows
       fCtx.strokeStyle = '#2d1c10';
-      fCtx.lineWidth = 10;
+      fCtx.lineWidth = osType === 'linux' ? 12 : 10;
       fCtx.lineCap = 'round';
       // Left eyebrow
       fCtx.beginPath();
@@ -433,11 +437,17 @@ export function createScene(container: HTMLElement): SceneContext {
           fCtx.fillStyle = '#f6f7fa';
           fCtx.fill();
 
-          // Iris (Striking Windows blue)
+          // Iris (Striking Windows blue or Hacker emerald green)
           const irisGrad = fCtx.createRadialGradient(x, eyeY, 2, x, eyeY, 13);
-          irisGrad.addColorStop(0, '#00a4ef');
-          irisGrad.addColorStop(0.7, '#0078d7');
-          irisGrad.addColorStop(1, '#003a68');
+          if (osType === 'windows') {
+            irisGrad.addColorStop(0, '#00a4ef');
+            irisGrad.addColorStop(0.7, '#0078d7');
+            irisGrad.addColorStop(1, '#003a68');
+          } else {
+            irisGrad.addColorStop(0, '#4ade80');
+            irisGrad.addColorStop(0.7, '#16a34a');
+            irisGrad.addColorStop(1, '#052e16');
+          }
           fCtx.fillStyle = irisGrad;
           fCtx.beginPath();
           fCtx.arc(x, eyeY, 13, 0, Math.PI * 2);
@@ -501,133 +511,36 @@ export function createScene(container: HTMLElement): SceneContext {
       fCtx.beginPath();
       fCtx.moveTo(0, 0);
       fCtx.lineTo(512, 0);
-      fCtx.lineTo(512, 85);
-      fCtx.quadraticCurveTo(380, 95, 300, 75);
-      fCtx.quadraticCurveTo(240, 110, 150, 90);
-      fCtx.lineTo(0, 85);
+      if (osType === 'windows') {
+        fCtx.lineTo(512, 85);
+        fCtx.quadraticCurveTo(380, 95, 300, 75);
+        fCtx.quadraticCurveTo(240, 110, 150, 90);
+        fCtx.lineTo(0, 85);
+      } else {
+        // Messy textured hacker fringe
+        fCtx.lineTo(512, 115);
+        fCtx.lineTo(440, 95);
+        fCtx.lineTo(390, 130);
+        fCtx.lineTo(330, 90);
+        fCtx.lineTo(280, 135);
+        fCtx.lineTo(230, 92);
+        fCtx.lineTo(170, 140);
+        fCtx.lineTo(120, 95);
+        fCtx.lineTo(60, 125);
+        fCtx.lineTo(0, 100);
+      }
       fCtx.closePath();
       fCtx.fill();
     }
 
-    drawFace(false);
+    drawFace(false, 'windows');
     const faceTexture = new THREE.CanvasTexture(faceCanvas);
 
-    // 2. Suit Canvas (512x512)
+    // 2. Suit / Hoodie Torso Canvas (512x512)
     const suitCanvas = document.createElement('canvas');
     suitCanvas.width = 512;
     suitCanvas.height = 512;
     const sCtx = suitCanvas.getContext('2d')!;
-
-    // Charcoal suit jacket base
-    sCtx.fillStyle = '#1c222d';
-    sCtx.fillRect(0, 0, 512, 512);
-
-    // Fine fabric texture
-    sCtx.fillStyle = 'rgba(255, 255, 255, 0.03)';
-    for (let i = 0; i < 512; i += 4) {
-      sCtx.fillRect(i, 0, 2, 512);
-      sCtx.fillRect(0, i, 512, 2);
-    }
-
-    // White collared shirt (V-neck opening)
-    sCtx.fillStyle = '#edf2f7';
-    sCtx.beginPath();
-    sCtx.moveTo(200, 0);
-    sCtx.lineTo(312, 0);
-    sCtx.lineTo(256, 240);
-    sCtx.closePath();
-    sCtx.fill();
-
-    // Shirt collar flaps
-    sCtx.fillStyle = '#ffffff';
-    sCtx.beginPath();
-    sCtx.moveTo(200, 0);
-    sCtx.lineTo(240, 80);
-    sCtx.lineTo(215, 85);
-    sCtx.closePath();
-    sCtx.fill();
-    sCtx.beginPath();
-    sCtx.moveTo(312, 0);
-    sCtx.lineTo(272, 80);
-    sCtx.lineTo(297, 85);
-    sCtx.closePath();
-    sCtx.fill();
-
-    // Tie (Windows blue #0078d7 with sheen)
-    sCtx.fillStyle = '#0078d7';
-    sCtx.beginPath();
-    sCtx.moveTo(244, 45);
-    sCtx.lineTo(268, 45);
-    sCtx.lineTo(278, 380);
-    sCtx.lineTo(256, 420);
-    sCtx.lineTo(234, 380);
-    sCtx.closePath();
-    sCtx.fill();
-
-    // Tie knot
-    sCtx.fillStyle = '#0063b1';
-    sCtx.beginPath();
-    sCtx.moveTo(242, 38);
-    sCtx.lineTo(270, 38);
-    sCtx.lineTo(262, 70);
-    sCtx.lineTo(250, 70);
-    sCtx.closePath();
-    sCtx.fill();
-
-    // Lapels
-    sCtx.fillStyle = '#151b24';
-    sCtx.beginPath();
-    sCtx.moveTo(130, 0);
-    sCtx.lineTo(200, 0);
-    sCtx.lineTo(245, 250);
-    sCtx.lineTo(160, 240);
-    sCtx.closePath();
-    sCtx.fill();
-
-    sCtx.beginPath();
-    sCtx.moveTo(382, 0);
-    sCtx.lineTo(312, 0);
-    sCtx.lineTo(267, 250);
-    sCtx.lineTo(352, 240);
-    sCtx.closePath();
-    sCtx.fill();
-
-    // Lapel stitch edges
-    sCtx.strokeStyle = 'rgba(255, 255, 255, 0.18)';
-    sCtx.lineWidth = 2;
-    sCtx.beginPath();
-    sCtx.moveTo(200, 0);
-    sCtx.lineTo(245, 250);
-    sCtx.moveTo(312, 0);
-    sCtx.lineTo(267, 250);
-    sCtx.stroke();
-
-    // Windows 4-pane logo enamel lapel pin
-    const pinX = 180;
-    const pinY = 160;
-    const pSize = 11;
-    const pGap = 3;
-    sCtx.fillStyle = '#f25022'; // Red
-    sCtx.fillRect(pinX - pSize - pGap / 2, pinY - pSize - pGap / 2, pSize, pSize);
-    sCtx.fillStyle = '#7fba00'; // Green
-    sCtx.fillRect(pinX + pGap / 2, pinY - pSize - pGap / 2, pSize, pSize);
-    sCtx.fillStyle = '#00a4ef'; // Blue
-    sCtx.fillRect(pinX - pSize - pGap / 2, pinY + pGap / 2, pSize, pSize);
-    sCtx.fillStyle = '#ffb900'; // Yellow
-    sCtx.fillRect(pinX + pGap / 2, pinY + pGap / 2, pSize, pSize);
-
-    // Suit buttons
-    sCtx.fillStyle = '#0d1016';
-    sCtx.strokeStyle = '#333e50';
-    sCtx.lineWidth = 2;
-    [290, 360, 430].forEach(y => {
-      sCtx.beginPath();
-      sCtx.arc(256, y, 7, 0, Math.PI * 2);
-      sCtx.fill();
-      sCtx.stroke();
-    });
-
-    const suitTexture = new THREE.CanvasTexture(suitCanvas);
 
     // 3. Hand Canvas (256x256)
     const handCanvas = document.createElement('canvas');
@@ -635,30 +548,244 @@ export function createScene(container: HTMLElement): SceneContext {
     handCanvas.height = 256;
     const hCtx = handCanvas.getContext('2d')!;
 
-    hCtx.fillStyle = '#e4b695';
-    hCtx.fillRect(0, 0, 256, 256);
+    function drawOpponentOutfit(osType: 'windows' | 'linux') {
+      sCtx.clearRect(0, 0, 512, 512);
 
-    // Suit sleeve cuff
-    hCtx.fillStyle = '#1c222d';
-    hCtx.fillRect(0, 180, 256, 76);
-    hCtx.fillStyle = '#ffffff';
-    hCtx.fillRect(0, 172, 256, 8);
+      if (osType === 'windows') {
+        // Charcoal suit jacket base
+        sCtx.fillStyle = '#1c222d';
+        sCtx.fillRect(0, 0, 512, 512);
 
-    // Knuckles and fingernails
-    hCtx.strokeStyle = 'rgba(120, 60, 30, 0.4)';
-    hCtx.lineWidth = 4;
-    [45, 95, 145, 195].forEach(x => {
-      hCtx.beginPath();
-      hCtx.moveTo(x, 15);
-      hCtx.lineTo(x, 150);
-      hCtx.stroke();
+        // Fine fabric texture
+        sCtx.fillStyle = 'rgba(255, 255, 255, 0.03)';
+        for (let i = 0; i < 512; i += 4) {
+          sCtx.fillRect(i, 0, 2, 512);
+          sCtx.fillRect(0, i, 512, 2);
+        }
 
-      hCtx.fillStyle = '#eed3c4';
-      hCtx.beginPath();
-      hCtx.ellipse(x + 10, 25, 7, 10, 0, 0, Math.PI * 2);
-      hCtx.fill();
-    });
+        // White collared shirt (V-neck opening)
+        sCtx.fillStyle = '#edf2f7';
+        sCtx.beginPath();
+        sCtx.moveTo(200, 0);
+        sCtx.lineTo(312, 0);
+        sCtx.lineTo(256, 240);
+        sCtx.closePath();
+        sCtx.fill();
 
+        // Shirt collar flaps
+        sCtx.fillStyle = '#ffffff';
+        sCtx.beginPath();
+        sCtx.moveTo(200, 0);
+        sCtx.lineTo(240, 80);
+        sCtx.lineTo(215, 85);
+        sCtx.closePath();
+        sCtx.fill();
+        sCtx.beginPath();
+        sCtx.moveTo(312, 0);
+        sCtx.lineTo(272, 80);
+        sCtx.lineTo(297, 85);
+        sCtx.closePath();
+        sCtx.fill();
+
+        // Tie (Windows blue #0078d7 with sheen)
+        sCtx.fillStyle = '#0078d7';
+        sCtx.beginPath();
+        sCtx.moveTo(244, 45);
+        sCtx.lineTo(268, 45);
+        sCtx.lineTo(278, 380);
+        sCtx.lineTo(256, 420);
+        sCtx.lineTo(234, 380);
+        sCtx.closePath();
+        sCtx.fill();
+
+        // Tie knot
+        sCtx.fillStyle = '#0063b1';
+        sCtx.beginPath();
+        sCtx.moveTo(242, 38);
+        sCtx.lineTo(270, 38);
+        sCtx.lineTo(262, 70);
+        sCtx.lineTo(250, 70);
+        sCtx.closePath();
+        sCtx.fill();
+
+        // Lapels
+        sCtx.fillStyle = '#151b24';
+        sCtx.beginPath();
+        sCtx.moveTo(130, 0);
+        sCtx.lineTo(200, 0);
+        sCtx.lineTo(245, 250);
+        sCtx.lineTo(160, 240);
+        sCtx.closePath();
+        sCtx.fill();
+
+        sCtx.beginPath();
+        sCtx.moveTo(382, 0);
+        sCtx.lineTo(312, 0);
+        sCtx.lineTo(267, 250);
+        sCtx.lineTo(352, 240);
+        sCtx.closePath();
+        sCtx.fill();
+
+        // Lapel stitch edges
+        sCtx.strokeStyle = 'rgba(255, 255, 255, 0.18)';
+        sCtx.lineWidth = 2;
+        sCtx.beginPath();
+        sCtx.moveTo(200, 0);
+        sCtx.lineTo(245, 250);
+        sCtx.moveTo(312, 0);
+        sCtx.lineTo(267, 250);
+        sCtx.stroke();
+
+        // Windows 4-pane logo enamel lapel pin
+        const pinX = 180;
+        const pinY = 160;
+        const pSize = 11;
+        const pGap = 3;
+        sCtx.fillStyle = '#f25022';
+        sCtx.fillRect(pinX - pSize - pGap / 2, pinY - pSize - pGap / 2, pSize, pSize);
+        sCtx.fillStyle = '#7fba00';
+        sCtx.fillRect(pinX + pGap / 2, pinY - pSize - pGap / 2, pSize, pSize);
+        sCtx.fillStyle = '#00a4ef';
+        sCtx.fillRect(pinX - pSize - pGap / 2, pinY + pGap / 2, pSize, pSize);
+        sCtx.fillStyle = '#ffb900';
+        sCtx.fillRect(pinX + pGap / 2, pinY + pGap / 2, pSize, pSize);
+
+        // Suit buttons
+        sCtx.fillStyle = '#0d1016';
+        sCtx.strokeStyle = '#333e50';
+        sCtx.lineWidth = 2;
+        [290, 360, 430].forEach(y => {
+          sCtx.beginPath();
+          sCtx.arc(256, y, 7, 0, Math.PI * 2);
+          sCtx.fill();
+          sCtx.stroke();
+        });
+
+        // Hand sleeve cuff
+        hCtx.fillStyle = '#e4b695';
+        hCtx.fillRect(0, 0, 256, 256);
+        hCtx.fillStyle = '#1c222d';
+        hCtx.fillRect(0, 180, 256, 76);
+        hCtx.fillStyle = '#ffffff';
+        hCtx.fillRect(0, 172, 256, 8);
+      } else {
+        // Dark Hacker Hoodie base
+        sCtx.fillStyle = '#11141a';
+        sCtx.fillRect(0, 0, 512, 512);
+
+        // Hoodie texture
+        sCtx.fillStyle = 'rgba(255, 255, 255, 0.02)';
+        for (let i = 0; i < 512; i += 3) {
+          sCtx.fillRect(i, 0, 1, 512);
+          sCtx.fillRect(0, i, 512, 1);
+        }
+
+        // Hoodie neckline & hood collar fold
+        sCtx.fillStyle = '#191e26';
+        sCtx.beginPath();
+        sCtx.moveTo(160, 0);
+        sCtx.quadraticCurveTo(256, 70, 352, 0);
+        sCtx.lineTo(400, 50);
+        sCtx.quadraticCurveTo(256, 110, 112, 50);
+        sCtx.closePath();
+        sCtx.fill();
+
+        // Inner black T-shirt visible in collar
+        sCtx.fillStyle = '#0a0c10';
+        sCtx.beginPath();
+        sCtx.moveTo(200, 0);
+        sCtx.quadraticCurveTo(256, 60, 312, 0);
+        sCtx.closePath();
+        sCtx.fill();
+
+        // Center metal zipper
+        sCtx.strokeStyle = '#64748b';
+        sCtx.lineWidth = 5;
+        sCtx.beginPath();
+        sCtx.moveTo(256, 65);
+        sCtx.lineTo(256, 512);
+        sCtx.stroke();
+
+        // Zipper pull tab
+        sCtx.fillStyle = '#94a3b8';
+        sCtx.fillRect(251, 80, 10, 18);
+
+        // Hoodie drawstrings (white/grey cord hanging down)
+        sCtx.strokeStyle = '#cbd5e1';
+        sCtx.lineWidth = 4;
+        sCtx.lineCap = 'round';
+        sCtx.beginPath();
+        sCtx.moveTo(215, 60);
+        sCtx.bezierCurveTo(210, 140, 225, 200, 220, 240);
+        sCtx.moveTo(297, 60);
+        sCtx.bezierCurveTo(302, 140, 287, 200, 292, 240);
+        sCtx.stroke();
+
+        // Drawstring metal aglets
+        sCtx.fillStyle = '#94a3b8';
+        sCtx.fillRect(217, 240, 6, 14);
+        sCtx.fillRect(289, 240, 6, 14);
+
+        // Kangaroo pocket curve seams
+        sCtx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
+        sCtx.lineWidth = 3;
+        sCtx.beginPath();
+        sCtx.moveTo(90, 480);
+        sCtx.lineTo(130, 350);
+        sCtx.lineTo(382, 350);
+        sCtx.lineTo(422, 480);
+        sCtx.stroke();
+
+        // Arch Linux / Tux embroidered chest patch (Left breast)
+        const patchX = 175;
+        const patchY = 165;
+        sCtx.fillStyle = '#1793d1'; // Arch cyan blue
+        sCtx.beginPath();
+        sCtx.arc(patchX, patchY, 24, 0, Math.PI * 2);
+        sCtx.fill();
+        sCtx.strokeStyle = '#38bdf8';
+        sCtx.lineWidth = 2.5;
+        sCtx.stroke();
+
+        // Mini Arch triangle inside patch
+        sCtx.fillStyle = '#ffffff';
+        sCtx.beginPath();
+        sCtx.moveTo(patchX, patchY - 14);
+        sCtx.lineTo(patchX - 12, patchY + 12);
+        sCtx.lineTo(patchX - 4, patchY + 10);
+        sCtx.lineTo(patchX, patchY + 2);
+        sCtx.lineTo(patchX + 4, patchY + 10);
+        sCtx.lineTo(patchX + 12, patchY + 12);
+        sCtx.closePath();
+        sCtx.fill();
+
+        // Hand sleeve cuff (Dark hoodie ribbing)
+        hCtx.fillStyle = '#e4b695';
+        hCtx.fillRect(0, 0, 256, 256);
+        hCtx.fillStyle = '#11141a';
+        hCtx.fillRect(0, 180, 256, 76);
+        hCtx.fillStyle = '#1e2430';
+        hCtx.fillRect(0, 172, 256, 8);
+      }
+
+      // Knuckles and fingernails on hand
+      hCtx.strokeStyle = 'rgba(120, 60, 30, 0.4)';
+      hCtx.lineWidth = 4;
+      [45, 95, 145, 195].forEach(x => {
+        hCtx.beginPath();
+        hCtx.moveTo(x, 15);
+        hCtx.lineTo(x, 150);
+        hCtx.stroke();
+
+        hCtx.fillStyle = '#eed3c4';
+        hCtx.beginPath();
+        hCtx.ellipse(x + 10, 25, 7, 10, 0, 0, Math.PI * 2);
+        hCtx.fill();
+      });
+    }
+
+    drawOpponentOutfit('windows');
+    const suitTexture = new THREE.CanvasTexture(suitCanvas);
     const handTexture = new THREE.CanvasTexture(handCanvas);
 
     // 4. Hair Canvas (256x256)
@@ -682,12 +809,13 @@ export function createScene(container: HTMLElement): SceneContext {
       faceTexture,
       drawFace,
       suitTexture,
+      drawOpponentOutfit,
       handTexture,
       hairTexture
     };
   }
 
-  const { faceTexture, drawFace, suitTexture, handTexture, hairTexture } = createOpponentTextures();
+  const { faceTexture, drawFace, suitTexture, drawOpponentOutfit, handTexture, hairTexture } = createOpponentTextures();
 
   // 3D Textured Opponent (Windows Corporate Dealer sitting across desk)
   const botOpponentGroup = new THREE.Group();
@@ -1708,19 +1836,62 @@ export function createScene(container: HTMLElement): SceneContext {
 
   let isOpponentDead = false;
   let lastBlink = 0;
+  let currentOpponentOS: 'windows' | 'linux' = 'windows';
 
-  function setOpponentDefeated(defeated: boolean) {
+  function setOpponentDefeated(defeated: boolean, botOS: 'windows' | 'linux' = currentOpponentOS) {
     isOpponentDead = defeated;
+    currentOpponentOS = botOS;
     if (defeated) {
-      drawFace(true);
+      drawFace(true, botOS);
       faceTexture.needsUpdate = true;
-      headGroup.rotation.x = -0.35;
-      headGroup.rotation.z = 0.22;
+      if (botOS === 'linux') {
+        // Dramatic Linux Hacker forward collapse onto desk / keyboard
+        torsoMesh.position.set(0, 0.20, -0.05);
+        torsoMesh.rotation.set(0.65, 0, 0.12);
+        headGroup.position.set(0.04, 0.62, 0.18);
+        headGroup.rotation.set(1.05, 0.15, 0.25);
+      } else {
+        // Dramatic Windows Dealer stiffen & slump back/side
+        torsoMesh.position.set(0.08, 0.28, -0.04);
+        torsoMesh.rotation.set(-0.25, 0, 0.35);
+        headGroup.position.set(0.12, 0.82, -0.06);
+        headGroup.rotation.set(-0.45, 0.1, 0.42);
+      }
     } else {
-      drawFace(false);
+      drawFace(false, botOS);
       faceTexture.needsUpdate = true;
-      headGroup.rotation.x = 0;
-      headGroup.rotation.z = 0;
+      torsoMesh.position.set(0, 0.32, 0);
+      torsoMesh.rotation.set(0, 0, 0);
+      headGroup.position.set(0, 0.88, 0.02);
+      headGroup.rotation.set(0, 0, 0);
+    }
+  }
+
+  function configureScene(playerOS: 'linux' | 'windows') {
+    const botOS = playerOS === 'linux' ? 'windows' : 'linux';
+    currentOpponentOS = botOS;
+    drawOpponentOutfit(botOS);
+    suitTexture.needsUpdate = true;
+    handTexture.needsUpdate = true;
+    drawFace(false, botOS);
+    faceTexture.needsUpdate = true;
+
+    // Monitor glow lights
+    playerMonitorGlow.color.setHex(playerOS === 'linux' ? 0x33ff66 : 0x0078d7);
+    botMonitorGlow.color.setHex(playerOS === 'linux' ? 0x0078d7 : 0x33ff66);
+    opponentRim.color.setHex(playerOS === 'linux' ? 0x0078d7 : 0x33ff66);
+
+    // Desk stickers
+    if (playerOS === 'linux') {
+      tuxGroup.position.set(-0.35, 0.941, 0.45);
+      tuxGroup.rotation.z = 0.2;
+      winGroup.position.set(0.35, 0.941, -1.05);
+      winGroup.rotation.z = Math.PI;
+    } else {
+      winGroup.position.set(-0.35, 0.941, 0.45);
+      winGroup.rotation.z = 0.2;
+      tuxGroup.position.set(0.35, 0.941, -1.05);
+      tuxGroup.rotation.z = Math.PI;
     }
   }
 
@@ -1802,7 +1973,8 @@ export function createScene(container: HTMLElement): SceneContext {
     setOpponentDefeated,
     zoomConsole,
     animatePlayerAction,
-    retractPlayerArm
+    retractPlayerArm,
+    configureScene
   };
 }
 

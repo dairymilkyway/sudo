@@ -3,33 +3,184 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Kernel Roulette</title>
+    <title>Kernel Roulette // Tactical Dual-Boot Duel</title>
   </head>
   <body>
     <div id="app">
       <div class="crt-overlay"></div>
-      <div id="scoreboard">
-        <span>SESSION RECORD</span>
-        <span>LINUX: <strong id="score-player" class="p-score">0</strong></span>
-        <span>WINDOWS: <strong id="score-bot" class="b-score">0</strong></span>
+
+      <!-- Cold-Boot BIOS / Bootloader Main Menu -->
+      <div id="main-menu" class="main-menu-overlay">
+        <div class="bios-chassis">
+          <div class="hex-bolt top-left"></div>
+          <div class="hex-bolt top-right"></div>
+          <div class="hex-bolt bottom-left"></div>
+          <div class="hex-bolt bottom-right"></div>
+
+          <div class="bios-header">
+            <div class="bios-id">ARBITER-CORE HARDWARE TEST CONSOLE // BUILD 2026.10-FATAL</div>
+            <div class="bios-diag">SERIAL: 115200 BAUD [OK] // ARBITER CONSOLE [ONLINE]</div>
+          </div>
+
+          <div class="bios-title-block">
+            <h1 class="glitch-title" data-text="KERNEL ROULETTE">KERNEL ROULETTE</h1>
+            <p class="bios-subtitle">TACTICAL DUAL-BOOT DUEL // 6 CHAMBERS • 1 FATAL DISCHARGE</p>
+          </div>
+
+          <div class="partition-selection-section">
+            <div class="section-label">SELECT BOOT PARTITION (YOUR FACTION)</div>
+
+            <div class="partition-cards">
+              <!-- Partition A: Arch Linux -->
+              <div class="partition-card active" id="card-linux" data-os="linux">
+                <div class="card-indicator">
+                  <span class="led-dot green"></span>
+                  <span class="part-tag">/dev/nvme0n1p2</span>
+                  <span class="fs-badge">ext4</span>
+                </div>
+                <div class="card-os-title">ARCH LINUX</div>
+                <div class="card-role">Rogue Kernel Contributor</div>
+                <div class="card-specs">
+                  <div class="spec-row"><span>SHELL:</span> <strong>Bash root (ttyS0)</strong></div>
+                  <div class="spec-row"><span>PAYLOAD:</span> <code class="cmd-preview">sudo rm -rf /*</code></div>
+                  <div class="spec-row"><span>OPPONENT:</span> <strong>Corporate SysAdmin</strong></div>
+                </div>
+                <div class="card-selection-pill">PRIMARY PARTITION</div>
+              </div>
+
+              <!-- Partition B: Windows 11 Enterprise -->
+              <div class="partition-card" id="card-windows" data-os="windows">
+                <div class="card-indicator">
+                  <span class="led-dot blue"></span>
+                  <span class="part-tag">\\Device\\Harddisk1</span>
+                  <span class="fs-badge">NTFS</span>
+                </div>
+                <div class="card-os-title">WINDOWS 11 ENT</div>
+                <div class="card-role">Lead Enterprise Architect</div>
+                <div class="card-specs">
+                  <div class="spec-row"><span>SHELL:</span> <strong>PowerShell Admin (COM3)</strong></div>
+                  <div class="spec-row"><span>PAYLOAD:</span> <code class="cmd-preview">del /f /s /q C:\*</code></div>
+                  <div class="spec-row"><span>OPPONENT:</span> <strong>Rogue Arch Hacker</strong></div>
+                </div>
+                <div class="card-selection-pill">SECONDARY PARTITION</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="bios-footer">
+            <button id="btn-start-game" class="btn-bios-boot">
+              <span class="btn-hazard-pattern"></span>
+              <span class="btn-text">INITIALIZE BOOT SEQUENCE</span>
+              <span class="btn-hazard-pattern"></span>
+            </button>
+            <div class="bios-hotkeys">CLICK TO BOOT // CLICK EITHER CARD TO CHOOSE OS</div>
+          </div>
+        </div>
       </div>
-      <div id="hud">
-        <div class="turn-indicator" id="turn-indicator">
-          CURRENT TURN: <span class="player-turn">PLAYER (LINUX)</span>
+
+      <!-- Industrial Server Rackmount Telemetry HUD (Top) -->
+      <header id="rackmount-telemetry" class="rackmount-telemetry" style="display: none;">
+        <div class="hex-bolt top-left"></div>
+        <div class="hex-bolt top-right"></div>
+        <div class="hex-bolt bottom-left"></div>
+        <div class="hex-bolt bottom-right"></div>
+
+        <!-- System A Telemetry (Player) -->
+        <div class="telemetry-bay bay-left" id="bay-player">
+          <div class="bay-header">
+            <span class="led-dot green" id="led-player"></span>
+            <span class="bay-os" id="telemetry-player-name">ARCH LINUX</span>
+            <span class="bay-tag">[SYS_A]</span>
+          </div>
+          <div class="nixie-tally">
+            <span class="nixie-label">WINS</span>
+            <div class="nixie-counter">
+              <span class="ghost">88</span>
+              <span id="score-player" class="val">00</span>
+            </div>
+          </div>
         </div>
-        <div class="chamber-slots" id="chamber-slots">
-          <div class="slot current" data-index="0"></div>
-          <div class="slot" data-index="1"></div>
-          <div class="slot" data-index="2"></div>
-          <div class="slot" data-index="3"></div>
-          <div class="slot" data-index="4"></div>
-          <div class="slot" data-index="5"></div>
+
+        <!-- Center Arbiter Protocol Bay -->
+        <div class="telemetry-bay bay-center">
+          <div class="protocol-title">DUAL-BOOT ARBITER // PROTOCOL v2.4</div>
+          <div class="protocol-readout">
+            <span class="readout-item">RATIO: <strong id="payload-ratio">1 / 6</strong></span>
+            <span class="readout-divider">|</span>
+            <span class="readout-item">BUS: <strong class="sync-status">SERIAL SYNCED</strong></span>
+          </div>
         </div>
+
+        <!-- System B Telemetry (Bot) -->
+        <div class="telemetry-bay bay-right" id="bay-bot">
+          <div class="bay-header">
+            <span class="bay-tag">[SYS_B]</span>
+            <span class="bay-os" id="telemetry-bot-name">WINDOWS 11</span>
+            <span class="led-dot blue" id="led-bot"></span>
+          </div>
+          <div class="nixie-tally">
+            <span class="nixie-label">WINS</span>
+            <div class="nixie-counter">
+              <span class="ghost">88</span>
+              <span id="score-bot" class="val">00</span>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- Bottom Control Console (Tactical Action & Matrix) -->
+      <nav id="hud" class="rackmount-hud" style="display: none;">
+        <div class="hex-bolt top-left"></div>
+        <div class="hex-bolt top-right"></div>
+
+        <!-- Hardware Status Annunciator Pill -->
+        <div class="annunciator-pill" id="turn-annunciator">
+          <span class="hazard-stripe"></span>
+          <span id="turn-text" class="annunciator-text">PRIORITY CONTROL: PLAYER (ARCH LINUX) - ARMED</span>
+          <span class="hazard-stripe"></span>
+        </div>
+
+        <!-- 6 Engraved Hardware Chamber Bays -->
+        <div class="chamber-matrix" id="chamber-matrix">
+          <div class="chamber-bay active" data-index="0">
+            <span class="bay-id">[01]</span>
+            <span class="bay-state">ARMED</span>
+          </div>
+          <div class="chamber-bay" data-index="1">
+            <span class="bay-id">[02]</span>
+            <span class="bay-state">READY</span>
+          </div>
+          <div class="chamber-bay" data-index="2">
+            <span class="bay-id">[03]</span>
+            <span class="bay-state">READY</span>
+          </div>
+          <div class="chamber-bay" data-index="3">
+            <span class="bay-id">[04]</span>
+            <span class="bay-state">READY</span>
+          </div>
+          <div class="chamber-bay" data-index="4">
+            <span class="bay-id">[05]</span>
+            <span class="bay-state">READY</span>
+          </div>
+          <div class="chamber-bay" data-index="5">
+            <span class="bay-id">[06]</span>
+            <span class="bay-state">READY</span>
+          </div>
+        </div>
+
+        <!-- Heavy Tactical Action Switches -->
         <div class="hud-actions">
-          <button id="btn-pull" class="btn-action">EXECUTE</button>
-          <button id="btn-spin" class="btn-action">SPIN & EXEC</button>
+          <button id="btn-pull" class="btn-tactical btn-exec">
+            <span class="btn-hazard-edge"></span>
+            <span id="btn-pull-label" class="btn-label">EXECUTE (SUDO)</span>
+            <span class="btn-hazard-edge"></span>
+          </button>
+          <button id="btn-spin" class="btn-tactical btn-spin">
+            <span class="btn-spin-icon">↻</span>
+            <span class="btn-label">SPIN ARBITER DIAL</span>
+          </button>
         </div>
-      </div>
+      </nav>
     </div>
     <script type="module" src="./src/main.ts"></script>
   </body>

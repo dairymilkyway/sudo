@@ -71,6 +71,19 @@ export class VirtualTerminal {
     this.render();
   }
 
+  public configure(options: Partial<TerminalOptions>): void {
+    if (options.bgColor !== undefined) this.bgColor = options.bgColor;
+    if (options.textColor !== undefined) this.textColor = options.textColor;
+    if (options.promptPrefix !== undefined) this.promptPrefix = options.promptPrefix;
+    if (options.osType !== undefined) {
+      this.osType = options.osType;
+      this.contentStartY = this.osType === 'linux' ? 72 : 46;
+      const availableHeight = this.height - this.contentStartY - 16;
+      this.maxLines = Math.floor(availableHeight / (this.fontSize + 6));
+    }
+    this.render();
+  }
+
   public addLine(line: string): void {
     this.lines.push(line);
     if (this.lines.length > this.maxLines) {
