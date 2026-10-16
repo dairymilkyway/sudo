@@ -171,18 +171,18 @@ function updateHUD() {
   scoreBot.textContent = String(state.stats.botWins).padStart(2, '0');
 
   // Update Turn Annunciator
-  turnText.className = 'annunciator-text';
+  turnText.className = 'turn-message';
   if (state.phase === 'player_turn') {
-    turnText.textContent = `PRIORITY CONTROL: PLAYER (${playerOS === 'linux' ? 'ARCH LINUX' : 'WINDOWS 11'}) - ARMED`;
+    turnText.textContent = `YOUR TURN — SELECT ACTION (${playerOS === 'linux' ? 'ARCH LINUX' : 'WINDOWS 11'})`;
     btnPull.disabled = false;
     btnSpin.disabled = false;
   } else if (state.phase === 'bot_turn') {
-    turnText.textContent = `ARBITER EVALUATING: OPPONENT (${botOS === 'linux' ? 'ARCH LINUX' : 'WINDOWS 11'}) THINKING...`;
+    turnText.textContent = `OPPONENT IS DECIDING (${botOS === 'linux' ? 'ARCH LINUX' : 'WINDOWS 11'})...`;
     turnText.classList.add('bot-active');
     btnPull.disabled = true;
     btnSpin.disabled = true;
   } else {
-    turnText.textContent = 'ARBITER RESOLVING HARDWARE DISCHARGE...';
+    turnText.textContent = 'DUAL-BOOT ARBITER RESOLVING DISCHARGE...';
     turnText.classList.add('resolving');
     btnPull.disabled = true;
     btnSpin.disabled = true;
@@ -322,6 +322,8 @@ cardLinux.addEventListener('click', () => {
   soundFX.playRelayClick();
   cardLinux.classList.add('active');
   cardWindows.classList.remove('active');
+  cardLinux.querySelector('.selection-indicator')!.textContent = 'SELECTED PARTITION';
+  cardWindows.querySelector('.selection-indicator')!.textContent = 'SELECT PARTITION';
 });
 
 cardWindows.addEventListener('click', () => {
@@ -330,6 +332,8 @@ cardWindows.addEventListener('click', () => {
   soundFX.playRelayClick();
   cardWindows.classList.add('active');
   cardLinux.classList.remove('active');
+  cardWindows.querySelector('.selection-indicator')!.textContent = 'SELECTED PARTITION';
+  cardLinux.querySelector('.selection-indicator')!.textContent = 'SELECT PARTITION';
 });
 
 function launchGame() {
