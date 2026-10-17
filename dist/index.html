@@ -3,176 +3,172 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Kernel Roulette</title>
-    <script type="module" crossorigin src="/assets/index-C8XRbdHM.js"></script>
-    <link rel="stylesheet" crossorigin href="/assets/index-DigrjVoQ.css">
+    <title>KERNEL ROULETTE</title>
+    <script type="module" crossorigin src="/assets/index-DX_80Uss.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-BpD7a4v4.css">
   </head>
   <body>
     <div id="app">
       <div class="crt-overlay"></div>
 
-      <!-- Atmospheric Main Menu -->
-      <div id="main-menu" class="main-menu-overlay">
-        <div class="menu-container">
-          <div class="menu-status-bar">
-            <span class="status-indicator"></span>
-            <span class="status-label">DUAL-BOOT ARBITER // LINK ONLINE</span>
-            <span class="status-payload">PAYLOAD: 1/6 ROOT CORRUPT</span>
+      <!-- Cold-Boot POST & OS Partition Mount Loader -->
+      <div id="boot-loader" class="boot-loader-screen">
+        <div class="boot-terminal-wrap">
+          <div class="boot-header-line">
+            <span id="boot-bios-title">ARBITER-ROM BIOS v2.4 // X86_64 DUAL-BOOT CONTROLLER</span>
+            <span id="boot-stage-tag">[POST: COLD_BOOT]</span>
           </div>
-
-          <div class="menu-hero">
-            <h1 class="game-title">KERNEL ROULETTE</h1>
-            <p class="game-subtitle">A high-stakes dual-boot duel over root privilege.</p>
-          </div>
-
-          <div class="partition-section">
-            <div class="partition-section-header">
-              <span>SELECT YOUR OPERATING SYSTEM</span>
-              <span class="hint-key">USE ← → ARROWS OR CLICK</span>
+          <div id="boot-log-lines" class="boot-log-lines"></div>
+          <div class="boot-progress-block">
+            <div class="boot-progress-meta">
+              <span id="boot-status-label">PROBING SERIAL BUS &amp;VRAM...</span>
+              <span id="boot-percent">0%</span>
             </div>
-
-            <div class="partition-cards">
-              <!-- Partition A: Arch Linux -->
-              <div class="partition-card active" id="card-linux" data-os="linux">
-                <div class="card-glow"></div>
-                <div class="card-header">
-                  <span class="card-badge">DEV/NVME0N1 • EXT4</span>
-                  <span class="card-status-dot green"></span>
-                </div>
-                <div class="card-body">
-                  <h2 class="card-title">ARCH LINUX</h2>
-                  <p class="card-persona">The Open-Source Purist</p>
-                  <blockquote class="card-quote">"I use Arch, by the way. Your master boot record is already mine."</blockquote>
-                  <div class="card-meta">
-                    <div class="meta-item">
-                      <span class="meta-label">LETHAL PAYLOAD</span>
-                      <code class="meta-code">sudo rm -rf /*</code>
-                    </div>
-                    <div class="meta-item">
-                      <span class="meta-label">OPPONENT</span>
-                      <span class="meta-val">Corporate SysAdmin</span>
-                    </div>
-                  </div>
-                </div>
-                <div class="card-footer">
-                  <span class="selection-indicator">SELECTED PARTITION</span>
-                </div>
-              </div>
-
-              <!-- Partition B: Windows 11 Enterprise -->
-              <div class="partition-card" id="card-windows" data-os="windows">
-                <div class="card-glow"></div>
-                <div class="card-header">
-                  <span class="card-badge">VOLUME C: • NTFS</span>
-                  <span class="card-status-dot blue"></span>
-                </div>
-                <div class="card-body">
-                  <h2 class="card-title">WINDOWS 11</h2>
-                  <p class="card-persona">The Enterprise Architect</p>
-                  <blockquote class="card-quote">"Your unlicensed partition has been marked for immediate decommission."</blockquote>
-                  <div class="card-meta">
-                    <div class="meta-item">
-                      <span class="meta-label">LETHAL PAYLOAD</span>
-                      <code class="meta-code">del /f /s /q C:\*</code>
-                    </div>
-                    <div class="meta-item">
-                      <span class="meta-label">OPPONENT</span>
-                      <span class="meta-val">Rogue Arch Hacker</span>
-                    </div>
-                  </div>
-                </div>
-                <div class="card-footer">
-                  <span class="selection-indicator">SELECT PARTITION</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="menu-action-bar">
-            <button id="btn-start-game" class="btn-boot-start">
-              <span class="btn-text">INITIALIZE BOOT SEQUENCE</span>
-              <span class="btn-arrow">→</span>
-            </button>
-            <div class="menu-hotkeys">
-              <span>PRESS <kbd>SPACE</kbd> OR <kbd>ENTER</kbd> TO BOOT</span>
+            <div class="boot-bar-track">
+              <div id="boot-bar-fill" class="boot-bar-fill"></div>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Refined Minimalist Scoreboard (Top HUD) -->
-      <header id="rackmount-telemetry" class="scoreboard-bar" style="display: none;">
-        <!-- Player Bay (Left) -->
-        <div class="score-side player-side">
-          <span class="led-dot green" id="led-player"></span>
-          <span class="faction-name" id="telemetry-player-name">ARCH LINUX</span>
-          <div class="score-counter">
-            <span id="score-player" class="score-digit">00</span>
+      <!-- Left-Anchored Brutalist Main Menu (Live 3D Scene on Right 2/3) -->
+      <div id="main-menu" class="main-menu-brutalist" style="display: none;">
+        <div class="menu-left-column">
+          <div class="menu-eyebrow">
+            <span class="live-pip"></span>
+            <span>TTY/S0 ARBITER LINKED // 6 SLOTS • 1 FATAL</span>
+          </div>
+
+          <div class="menu-title-group">
+            <h1 class="brutalist-title">KERNEL<br />ROULETTE</h1>
+            <p class="brutalist-tagline">Two operating systems. One shared master boot record.</p>
+          </div>
+
+          <div class="menu-partition-list" role="radiogroup" aria-label="Select Operating System">
+            <div class="list-section-header">
+              <span>SELECT BOOT PARTITION</span>
+              <span>[←/→ OR HOVER]</span>
+            </div>
+
+            <!-- Strip 01: Arch Linux -->
+            <div class="os-strip active" id="card-linux" data-os="linux">
+              <div class="strip-index">01</div>
+              <div class="strip-main">
+                <div class="strip-top-row">
+                  <span class="strip-os-name">ARCH LINUX</span>
+                  <span class="strip-fs-tag">/dev/nvme0n1p2 • ext4</span>
+                </div>
+                <div class="strip-bottom-row">
+                  <span class="strip-cmd">PAYLOAD: <code>sudo rm -rf /*</code></span>
+                  <span class="strip-foe">VS. CORPORATE SYSADMIN</span>
+                </div>
+              </div>
+              <div class="strip-status selection-indicator">ACTIVE</div>
+            </div>
+
+            <!-- Strip 02: Windows 11 -->
+            <div class="os-strip" id="card-windows" data-os="windows">
+              <div class="strip-index">02</div>
+              <div class="strip-main">
+                <div class="strip-top-row">
+                  <span class="strip-os-name">WINDOWS 11</span>
+                  <span class="strip-fs-tag">\Device\Harddisk1 • NTFS</span>
+                </div>
+                <div class="strip-bottom-row">
+                  <span class="strip-cmd">PAYLOAD: <code>del /f /s /q C:\*</code></span>
+                  <span class="strip-foe">VS. ROGUE ARCH HACKER</span>
+                </div>
+              </div>
+              <div class="strip-status selection-indicator">STANDBY</div>
+            </div>
+          </div>
+
+          <div class="menu-launch-group">
+            <button id="btn-start-game" class="btn-brutalist-boot">
+              <span class="boot-btn-label">[ INITIALIZE BOOT SEQUENCE ]</span>
+              <span class="boot-btn-key">ENTER ↵</span>
+            </button>
           </div>
         </div>
 
-        <!-- Center Match Status -->
-        <div class="score-divider">
-          <span class="divider-label">DUEL RECORD</span>
-          <span class="divider-dash">•</span>
-          <span class="divider-status">1 FATAL / 6 SLOTS</span>
+        <!-- Subtle Right-Side 3D Viewport Label -->
+        <div class="menu-viewport-caption">
+          <span class="caption-line">LIVE RIG TELEMETRY // <strong id="menu-preview-label">ARCH LINUX VS. CORPORATE SYSADMIN</strong></span>
         </div>
+      </div>
 
-        <!-- Bot Bay (Right) -->
-        <div class="score-side bot-side">
-          <div class="score-counter">
-            <span id="score-bot" class="score-digit">00</span>
+      <!-- Frameless Brutalist Top-Left Corner Scoreboard -->
+      <header id="rackmount-telemetry" class="corner-telemetry" style="display: none;">
+        <div class="telemetry-rule-top">
+          <span>SESSION TALLY</span>
+          <span class="telemetry-sep">//</span>
+          <span>1 FATAL PAYLOAD</span>
+        </div>
+        <div class="telemetry-scores">
+          <div class="tally-row player-tally">
+            <span class="led-dot green" id="led-player"></span>
+            <span class="tally-os" id="telemetry-player-name">ARCH LINUX</span>
+            <span class="tally-role">[YOU]</span>
+            <span class="tally-val" id="score-player">00</span>
           </div>
-          <span class="faction-name" id="telemetry-bot-name">WINDOWS 11</span>
-          <span class="led-dot blue" id="led-bot"></span>
+          <div class="tally-row bot-tally">
+            <span class="led-dot blue" id="led-bot"></span>
+            <span class="tally-os" id="telemetry-bot-name">WINDOWS 11</span>
+            <span class="tally-role">[OPP]</span>
+            <span class="tally-val" id="score-bot">00</span>
+          </div>
         </div>
       </header>
 
-      <!-- Tactical Bottom Console (Turn, Chambers, Actions) -->
-      <nav id="hud" class="hud-console" style="display: none;">
-        <!-- Turn Status Annunciator -->
-        <div class="turn-bar" id="turn-annunciator">
-          <span class="turn-dot"></span>
-          <span id="turn-text" class="turn-message">YOUR TURN — SELECT ACTION</span>
+      <!-- Diegetic Opponent Trash-Talk Subtitle Overlay -->
+      <div id="opponent-subtitle" class="opponent-subtitle" style="display: none;">
+        <div class="subtitle-speaker" id="subtitle-speaker">CORPORATE SYSADMIN // COM3</div>
+        <div class="subtitle-text" id="subtitle-text"></div>
+      </div>
+
+      <!-- Frameless Brutalist Bottom Control Strip -->
+      <nav id="hud" class="brutalist-hud" style="display: none;">
+        <div class="hud-top-strip">
+          <div class="turn-readout" id="turn-annunciator">
+            <span class="turn-pip"></span>
+            <span id="turn-text" class="turn-message">YOUR TURN — SELECT ACTION</span>
+          </div>
+          <div class="chamber-matrix" id="chamber-matrix">
+            <div class="chamber-bay active" data-index="0">
+              <span class="bay-id">01</span>
+              <span class="bay-state">ARMED</span>
+            </div>
+            <div class="chamber-bay" data-index="1">
+              <span class="bay-id">02</span>
+              <span class="bay-state">READY</span>
+            </div>
+            <div class="chamber-bay" data-index="2">
+              <span class="bay-id">03</span>
+              <span class="bay-state">READY</span>
+            </div>
+            <div class="chamber-bay" data-index="3">
+              <span class="bay-id">04</span>
+              <span class="bay-state">READY</span>
+            </div>
+            <div class="chamber-bay" data-index="4">
+              <span class="bay-id">05</span>
+              <span class="bay-state">READY</span>
+            </div>
+            <div class="chamber-bay" data-index="5">
+              <span class="bay-id">06</span>
+              <span class="bay-state">READY</span>
+            </div>
+          </div>
         </div>
 
-        <!-- 6 Precision Chamber Slots -->
-        <div class="chamber-matrix" id="chamber-matrix">
-          <div class="chamber-bay active" data-index="0">
-            <span class="bay-id">1</span>
-            <span class="bay-state">ARMED</span>
-          </div>
-          <div class="chamber-bay" data-index="1">
-            <span class="bay-id">2</span>
-            <span class="bay-state">READY</span>
-          </div>
-          <div class="chamber-bay" data-index="2">
-            <span class="bay-id">3</span>
-            <span class="bay-state">READY</span>
-          </div>
-          <div class="chamber-bay" data-index="3">
-            <span class="bay-id">4</span>
-            <span class="bay-state">READY</span>
-          </div>
-          <div class="chamber-bay" data-index="4">
-            <span class="bay-id">5</span>
-            <span class="bay-state">READY</span>
-          </div>
-          <div class="chamber-bay" data-index="5">
-            <span class="bay-id">6</span>
-            <span class="bay-state">READY</span>
-          </div>
-        </div>
-
-        <!-- Tactile Action Switches -->
-        <div class="hud-actions">
-          <button id="btn-pull" class="btn-action btn-execute">
-            <span class="action-accent"></span>
-            <span id="btn-pull-label" class="action-label">EXECUTE (SUDO)</span>
+        <div class="hud-action-strip">
+          <button id="btn-pull" class="btn-brutalist-action btn-execute">
+            <span id="btn-pull-label" class="action-label">[ EXECUTE // SUDO ]</span>
+            <span class="action-sub">FIRE CURRENT SLOT</span>
           </button>
-          <button id="btn-spin" class="btn-action btn-cycle">
-            <span class="action-icon">↻</span>
-            <span class="action-label">SPIN & EXEC</span>
+          <button id="btn-spin" class="btn-brutalist-action btn-cycle">
+            <span class="action-label">[ SPIN &amp; EXECUTE ]</span>
+            <span class="action-sub">RANDOMIZE ROTARY DIAL</span>
           </button>
         </div>
       </nav>

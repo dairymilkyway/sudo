@@ -9,9 +9,9 @@ html, body {
   width: 100%;
   height: 100%;
   overflow: hidden;
-  background-color: #040609;
-  font-family: ui-monospace, 'SF Mono', 'JetBrains Mono', 'Menlo', 'Consolas', monospace;
-  color: #e2e8f0;
+  background-color: #030508;
+  font-family: ui-monospace, 'JetBrains Mono', 'SF Mono', 'Menlo', 'Consolas', monospace;
+  color: #f1f5f9;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -22,7 +22,7 @@ html, body {
   overflow: hidden;
 }
 
-/* Atmospheric CRT Scanline & Edge Vignette */
+/* Subtle Analog Scanlines & Edge Vignette */
 .crt-overlay {
   position: absolute;
   top: 0;
@@ -30,683 +30,718 @@ html, body {
   width: 100%;
   height: 100%;
   pointer-events: none;
-  background: radial-gradient(circle at center, transparent 60%, rgba(2, 3, 5, 0.85) 100%),
-              repeating-linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.18) 50%);
+  background: radial-gradient(circle at center, transparent 58%, rgba(0, 0, 0, 0.82) 100%),
+              repeating-linear-gradient(rgba(16, 16, 16, 0) 50%, rgba(0, 0, 0, 0.22) 50%);
   background-size: 100% 100%, 100% 3px;
   z-index: 5;
 }
 
-/* Precision Hardware LED Dots */
+/* Precision Status Dots */
 .led-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
+  width: 6px;
+  height: 6px;
   display: inline-block;
-  background: #334155;
-  transition: all 0.3s ease;
+  background: #475569;
   flex-shrink: 0;
 }
 
 .led-dot.green {
   background: #22c55e;
-  box-shadow: 0 0 8px #22c55e, 0 0 12px rgba(34, 197, 94, 0.5);
+  box-shadow: 0 0 8px #22c55e;
 }
 
 .led-dot.blue {
   background: #0ea5e9;
-  box-shadow: 0 0 8px #0ea5e9, 0 0 12px rgba(14, 165, 233, 0.5);
-}
-
-.led-dot.amber {
-  background: #f59e0b;
-  box-shadow: 0 0 8px #f59e0b, 0 0 12px rgba(245, 158, 11, 0.5);
-}
-
-.led-dot.red {
-  background: #ef4444;
-  box-shadow: 0 0 8px #ef4444, 0 0 12px rgba(239, 68, 68, 0.5);
-}
-
-/* ==========================================================================
-   1. CINEMATIC MAIN MENU & OS PARTITION SELECTOR
-   ========================================================================== */
-.main-menu-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 40;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: radial-gradient(circle at center, rgba(6, 9, 14, 0.88) 0%, rgba(2, 3, 6, 0.96) 100%);
-  backdrop-filter: blur(12px);
-  padding: 24px;
-}
-
-.menu-container {
-  position: relative;
-  width: 820px;
-  max-width: 95vw;
-  background: linear-gradient(180deg, rgba(17, 23, 34, 0.95) 0%, rgba(9, 12, 18, 0.98) 100%);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.85), inset 0 1px 0 rgba(255, 255, 255, 0.1);
-  border-radius: 10px;
-  padding: 32px 38px;
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-}
-
-.menu-status-bar {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-  padding-bottom: 14px;
-  font-size: 11px;
-  letter-spacing: 0.12em;
-  color: #64748b;
-}
-
-.status-indicator {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: #22c55e;
-  box-shadow: 0 0 8px #22c55e;
-}
-
-.status-label {
-  color: #94a3b8;
-  font-weight: 600;
-}
-
-.status-payload {
-  margin-left: auto;
-  color: #f59e0b;
-}
-
-.menu-hero {
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.game-title {
-  font-size: 40px;
-  font-weight: 900;
-  letter-spacing: 0.1em;
-  color: #f8fafc;
-  text-shadow: 0 2px 16px rgba(255, 255, 255, 0.15);
-}
-
-.game-subtitle {
-  font-size: 13px;
-  color: #94a3b8;
-  letter-spacing: 0.06em;
-}
-
-.partition-section {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.partition-section-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 11px;
-  letter-spacing: 0.14em;
-  color: #64748b;
-  font-weight: 600;
-}
-
-.hint-key {
-  color: #475569;
-}
-
-.partition-cards {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 18px;
-}
-
-.partition-card {
-  position: relative;
-  background: rgba(12, 16, 24, 0.75);
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  border-radius: 8px;
-  padding: 22px;
-  cursor: pointer;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
-  overflow: hidden;
-}
-
-.partition-card:hover {
-  background: rgba(18, 24, 36, 0.85);
-  border-color: rgba(255, 255, 255, 0.18);
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
-}
-
-#card-linux.active {
-  background: linear-gradient(180deg, rgba(16, 32, 24, 0.6) 0%, rgba(10, 18, 14, 0.8) 100%);
-  border-color: #22c55e;
-  box-shadow: 0 0 24px rgba(34, 197, 94, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.1);
-}
-
-#card-windows.active {
-  background: linear-gradient(180deg, rgba(14, 28, 44, 0.6) 0%, rgba(9, 16, 26, 0.8) 100%);
-  border-color: #0ea5e9;
-  box-shadow: 0 0 24px rgba(14, 165, 233, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.1);
-}
-
-.card-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.card-badge {
-  font-size: 10px;
-  letter-spacing: 0.1em;
-  font-weight: 700;
-  color: #64748b;
-  background: rgba(255, 255, 255, 0.04);
-  padding: 3px 8px;
-  border-radius: 3px;
-}
-
-#card-linux.active .card-badge {
-  color: #4ade80;
-  background: rgba(34, 197, 94, 0.12);
-}
-
-#card-windows.active .card-badge {
-  color: #38bdf8;
-  background: rgba(14, 165, 233, 0.12);
-}
-
-.card-status-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: #334155;
-}
-
-#card-linux.active .card-status-dot {
-  background: #22c55e;
-  box-shadow: 0 0 8px #22c55e;
-}
-
-#card-windows.active .card-status-dot {
-  background: #0ea5e9;
   box-shadow: 0 0 8px #0ea5e9;
 }
 
-.card-body {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.card-title {
-  font-size: 21px;
-  font-weight: 800;
-  letter-spacing: 0.05em;
-  color: #f1f5f9;
-}
-
-#card-linux .card-title { color: #4ade80; }
-#card-windows .card-title { color: #38bdf8; }
-
-.card-persona {
-  font-size: 12px;
-  color: #94a3b8;
-  letter-spacing: 0.02em;
-}
-
-.card-quote {
-  font-size: 11px;
-  color: #cbd5e1;
-  line-height: 1.5;
-  border-left: 2px solid rgba(255, 255, 255, 0.15);
-  padding-left: 10px;
-  margin: 6px 0;
-  font-style: italic;
-}
-
-.card-meta {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
-  padding-top: 10px;
-  font-size: 11px;
-}
-
-.meta-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.meta-label {
-  color: #64748b;
-  font-size: 10px;
-  letter-spacing: 0.08em;
-}
-
-.meta-code {
-  background: rgba(0, 0, 0, 0.4);
-  padding: 2px 6px;
-  border-radius: 3px;
-  color: #fbbf24;
-  font-family: inherit;
-  font-size: 10px;
-}
-
-.meta-val {
-  color: #cbd5e1;
-  font-weight: 600;
-}
-
-.card-footer {
-  margin-top: auto;
-  padding-top: 8px;
-}
-
-.selection-indicator {
-  display: block;
-  text-align: center;
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  padding: 6px;
-  border-radius: 4px;
-  background: rgba(255, 255, 255, 0.04);
-  color: #64748b;
-  transition: all 0.2s ease;
-}
-
-#card-linux.active .selection-indicator {
-  background: rgba(34, 197, 94, 0.15);
-  color: #22c55e;
-  border: 1px solid rgba(34, 197, 94, 0.3);
-}
-
-#card-windows.active .selection-indicator {
-  background: rgba(14, 165, 233, 0.15);
-  color: #0ea5e9;
-  border: 1px solid rgba(14, 165, 233, 0.3);
-}
-
-.menu-action-bar {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
-  padding-top: 18px;
-}
-
-.btn-boot-start {
+/* ==========================================================================
+   1. COLD-BOOT POST & OS PARTITION MOUNT LOADER
+   ========================================================================== */
+.boot-loader-screen {
+  position: absolute;
+  inset: 0;
+  z-index: 90;
+  background: #030508;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 12px;
-  width: 100%;
-  max-width: 380px;
-  padding: 14px 28px;
-  background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: 6px;
-  color: #f8fafc;
-  font-family: inherit;
-  font-size: 13px;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  padding: 48px;
+  transition: opacity 0.35s ease;
 }
 
-.btn-boot-start:hover {
-  background: linear-gradient(180deg, #28374d 0%, #131d2b 100%);
-  border-color: #38bdf8;
-  color: #38bdf8;
-  box-shadow: 0 0 24px rgba(56, 189, 248, 0.3);
-  transform: translateY(-2px);
+.boot-loader-screen.fade-out {
+  opacity: 0;
+  pointer-events: none;
 }
 
-.btn-boot-start:active {
-  transform: translateY(1px);
-}
-
-.btn-arrow {
-  font-size: 16px;
-  transition: transform 0.2s ease;
-}
-
-.btn-boot-start:hover .btn-arrow {
-  transform: translateX(4px);
-}
-
-.menu-hotkeys {
-  font-size: 11px;
-  letter-spacing: 0.08em;
-  color: #64748b;
-}
-
-.menu-hotkeys kbd {
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  padding: 2px 6px;
-  border-radius: 3px;
-  color: #cbd5e1;
-  font-family: inherit;
-  font-size: 10px;
-}
-
-/* ==========================================================================
-   2. REFINED MINIMALIST SCOREBOARD (TOP HUD)
-   ========================================================================== */
-.scoreboard-bar {
-  position: absolute;
-  top: 22px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 10;
+.boot-terminal-wrap {
+  width: 680px;
+  max-width: 92vw;
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: auto;
-  min-width: 500px;
-  max-width: 620px;
-  height: 48px;
-  background: linear-gradient(180deg, rgba(17, 22, 32, 0.94) 0%, rgba(9, 12, 18, 0.98) 100%);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 6px;
-  padding: 0 20px;
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  flex-direction: column;
   gap: 20px;
 }
 
-.score-side {
+.boot-header-line {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.18);
+  padding-bottom: 10px;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  color: #94a3b8;
+  font-weight: 700;
+}
+
+#boot-stage-tag {
+  color: #f59e0b;
+}
+
+.boot-log-lines {
+  min-height: 150px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 12px;
+  line-height: 1.45;
+  color: #cbd5e1;
+  font-variant-numeric: tabular-nums;
+}
+
+.boot-log-lines .log-ok {
+  color: #22c55e;
+  font-weight: 700;
+}
+
+.boot-log-lines .log-warn {
+  color: #f59e0b;
+  font-weight: 700;
+}
+
+.boot-log-lines .log-win {
+  color: #38bdf8;
+  font-weight: 700;
+}
+
+.boot-progress-block {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  padding-top: 14px;
+}
+
+.boot-progress-meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  color: #94a3b8;
+  font-weight: 700;
+}
+
+#boot-percent {
+  color: #f8fafc;
+  font-variant-numeric: tabular-nums;
+}
+
+.boot-bar-track {
+  width: 100%;
+  height: 10px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 1px;
+}
+
+.boot-bar-fill {
+  height: 100%;
+  width: 0%;
+  background: #f8fafc;
+  transition: width 0.08s linear;
+}
+
+/* ==========================================================================
+   2. LEFT-ANCHORED BRUTALIST MAIN MENU (LIVE 3D DESK ON RIGHT 2/3)
+   ========================================================================== */
+.main-menu-brutalist {
+  position: absolute;
+  inset: 0;
+  z-index: 40;
+  display: flex;
+  justify-content: space-between;
+  align-items: stretch;
+  background: linear-gradient(
+    90deg,
+    rgba(3, 5, 8, 0.96) 0%,
+    rgba(3, 5, 8, 0.86) 34%,
+    rgba(3, 5, 8, 0.25) 62%,
+    rgba(3, 5, 8, 0.0) 100%
+  );
+  padding: 48px 56px;
+}
+
+.menu-left-column {
+  width: 480px;
+  max-width: 90vw;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 36px;
+}
+
+.menu-eyebrow {
   display: flex;
   align-items: center;
+  gap: 10px;
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  color: #94a3b8;
+  font-weight: 700;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+  padding-bottom: 12px;
+}
+
+.live-pip {
+  width: 7px;
+  height: 7px;
+  background: #ef4444;
+  box-shadow: 0 0 8px #ef4444;
+  animation: pulse-pip 1.6s infinite;
+}
+
+@keyframes pulse-pip {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+
+.menu-title-group {
+  display: flex;
+  flex-direction: column;
   gap: 12px;
 }
 
-.faction-name {
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  color: #cbd5e1;
+.brutalist-title {
+  font-size: 58px;
+  font-weight: 900;
+  line-height: 0.94;
+  letter-spacing: 0.04em;
+  color: #f8fafc;
+  text-transform: uppercase;
 }
 
-.score-counter {
-  background: #05070a;
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  border-radius: 3px;
-  padding: 2px 8px;
+.brutalist-tagline {
+  font-size: 13px;
+  color: #94a3b8;
+  letter-spacing: 0.04em;
+  border-left: 2px solid rgba(255, 255, 255, 0.35);
+  padding-left: 12px;
+}
+
+.menu-partition-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.list-section-header {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  color: #64748b;
+  font-weight: 700;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.os-strip {
+  display: flex;
+  align-items: stretch;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(6, 9, 14, 0.55);
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+  position: relative;
+}
+
+.os-strip::before {
+  content: '';
+  width: 4px;
+  background: transparent;
+  transition: background 0.15s ease;
+}
+
+.os-strip:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+#card-linux.active {
+  background: rgba(34, 197, 94, 0.08);
+}
+
+#card-linux.active::before {
+  background: #22c55e;
+}
+
+#card-windows.active {
+  background: rgba(14, 165, 233, 0.08);
+}
+
+#card-windows.active::before {
+  background: #0ea5e9;
+}
+
+.strip-index {
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 48px;
+  font-size: 13px;
+  font-weight: 800;
+  color: #64748b;
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  font-variant-numeric: tabular-nums;
 }
 
-.score-digit {
-  font-size: 17px;
+#card-linux.active .strip-index {
+  color: #22c55e;
+}
+
+#card-windows.active .strip-index {
+  color: #0ea5e9;
+}
+
+.strip-main {
+  flex: 1;
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.strip-top-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.strip-os-name {
+  font-size: 18px;
   font-weight: 800;
-  font-variant-numeric: tabular-nums;
-  line-height: 1;
+  letter-spacing: 0.06em;
+  color: #f8fafc;
+}
+
+#card-linux.active .strip-os-name {
+  color: #4ade80;
+}
+
+#card-windows.active .strip-os-name {
+  color: #38bdf8;
+}
+
+.strip-fs-tag {
+  font-size: 11px;
+  color: #64748b;
   letter-spacing: 0.05em;
 }
 
-.player-side .score-digit {
+.strip-bottom-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 11px;
+  color: #94a3b8;
+}
+
+.strip-cmd code {
+  color: #fbbf24;
+  font-family: inherit;
+}
+
+.strip-foe {
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  color: #64748b;
+  font-weight: 700;
+}
+
+.strip-status {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 82px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  color: #475569;
+  border-left: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+#card-linux.active .strip-status {
   color: #22c55e;
-  text-shadow: 0 0 10px rgba(34, 197, 94, 0.5);
 }
 
-.bot-side .score-digit {
+#card-windows.active .strip-status {
   color: #0ea5e9;
-  text-shadow: 0 0 10px rgba(14, 165, 233, 0.5);
 }
 
-.score-divider {
+.menu-launch-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.btn-brutalist-boot {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 18px 22px;
+  background: #f8fafc;
+  color: #030508;
+  border: 1px solid #f8fafc;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-brutalist-boot:hover {
+  background: #22c55e;
+  border-color: #22c55e;
+  color: #030508;
+}
+
+.btn-brutalist-boot:active {
+  transform: translateY(1px);
+}
+
+.boot-btn-key {
+  font-size: 11px;
+  font-weight: 800;
+  opacity: 0.75;
+}
+
+.menu-viewport-caption {
+  align-self: flex-end;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.25);
+  padding-bottom: 6px;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  color: #94a3b8;
+}
+
+.menu-viewport-caption strong {
+  color: #f8fafc;
+}
+
+/* ==========================================================================
+   3. FRAMELESS BRUTALIST TOP-LEFT CORNER SCOREBOARD
+   ========================================================================== */
+.corner-telemetry {
+  position: absolute;
+  top: 28px;
+  left: 32px;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border-left: 2px solid #f8fafc;
+  padding-left: 14px;
+  pointer-events: none;
+}
+
+.telemetry-rule-top {
   display: flex;
   align-items: center;
   gap: 8px;
   font-size: 10px;
-  letter-spacing: 0.1em;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  color: #94a3b8;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.18);
+  padding-bottom: 4px;
+}
+
+.telemetry-sep {
+  color: #475569;
+}
+
+.telemetry-scores {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.tally-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+
+.tally-os {
+  min-width: 115px;
+  color: #e2e8f0;
+}
+
+.tally-role {
+  font-size: 10px;
   color: #64748b;
-  border-left: 1px solid rgba(255, 255, 255, 0.06);
-  border-right: 1px solid rgba(255, 255, 255, 0.06);
-  padding: 0 16px;
-  height: 24px;
+  min-width: 38px;
 }
 
-.divider-status {
-  color: #f59e0b;
-  font-weight: 600;
+.tally-val {
+  font-size: 16px;
+  font-weight: 900;
+  font-variant-numeric: tabular-nums;
+  color: #f8fafc;
+  padding-left: 6px;
 }
 
-.divider-dash {
-  color: #334155;
+.player-tally .tally-val {
+  color: #4ade80;
+}
+
+.bot-tally .tally-val {
+  color: #38bdf8;
 }
 
 /* ==========================================================================
-   3. TACTICAL BOTTOM CONSOLE (TURN, CHAMBERS, ACTIONS)
+   4. DIEGETIC OPPONENT TRASH-TALK SUBTITLE
    ========================================================================== */
-.hud-console {
+.opponent-subtitle {
+  position: absolute;
+  top: 12%;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 25;
+  min-width: 360px;
+  max-width: 640px;
+  background: rgba(3, 5, 8, 0.92);
+  border-left: 3px solid #38bdf8;
+  border-top: 1px solid rgba(255, 255, 255, 0.14);
+  border-right: 1px solid rgba(255, 255, 255, 0.14);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+  padding: 10px 18px;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.opponent-subtitle.linux-speaker {
+  border-left-color: #22c55e;
+}
+
+.subtitle-speaker {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  color: #38bdf8;
+  text-transform: uppercase;
+}
+
+.opponent-subtitle.linux-speaker .subtitle-speaker {
+  color: #4ade80;
+}
+
+.subtitle-text {
+  font-size: 14px;
+  font-weight: 700;
+  color: #f8fafc;
+  line-height: 1.4;
+  letter-spacing: 0.02em;
+}
+
+/* ==========================================================================
+   5. FRAMELESS BRUTALIST BOTTOM CONTROL STRIP
+   ========================================================================== */
+.brutalist-hud {
   position: absolute;
   bottom: 24px;
   left: 50%;
   transform: translateX(-50%);
   z-index: 10;
+  width: 620px;
+  max-width: 95vw;
+  background: rgba(3, 5, 8, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 14px;
-  width: 520px;
-  max-width: 95vw;
-  background: linear-gradient(180deg, rgba(16, 21, 30, 0.95) 0%, rgba(9, 12, 18, 0.98) 100%);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 8px;
-  padding: 16px 22px;
-  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.85), inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
-.turn-bar {
+.hud-top-strip {
+  display: flex;
+  justify-content: space-between;
+  align-items: stretch;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.16);
+}
+
+.turn-readout {
+  flex: 1;
   display: flex;
   align-items: center;
-  justify-content: center;
   gap: 10px;
-  width: 100%;
-  background: rgba(0, 0, 0, 0.45);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: 4px;
-  padding: 7px 12px;
+  padding: 10px 16px;
+  border-right: 1px solid rgba(255, 255, 255, 0.16);
 }
 
-.turn-dot {
+.turn-pip {
   width: 6px;
   height: 6px;
-  border-radius: 50%;
   background: #22c55e;
-  box-shadow: 0 0 8px #22c55e;
+  flex-shrink: 0;
 }
 
 .turn-message {
   font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  color: #22c55e;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  color: #f8fafc;
   text-transform: uppercase;
 }
 
 .turn-message.bot-active {
-  color: #0ea5e9;
+  color: #38bdf8;
 }
 
-.turn-bar:has(.bot-active) .turn-dot {
-  background: #0ea5e9;
-  box-shadow: 0 0 8px #0ea5e9;
+.turn-readout:has(.bot-active) .turn-pip {
+  background: #38bdf8;
 }
 
 .turn-message.resolving {
   color: #f59e0b;
 }
 
-.turn-bar:has(.resolving) .turn-dot {
+.turn-readout:has(.resolving) .turn-pip {
   background: #f59e0b;
-  box-shadow: 0 0 8px #f59e0b;
 }
 
-/* 6 Precision Chamber Slots */
+/* 6 Exposed Hardware Chamber Blocks */
 .chamber-matrix {
   display: flex;
-  gap: 8px;
-  width: 100%;
-  justify-content: center;
 }
 
 .chamber-bay {
+  width: 46px;
+  padding: 6px 4px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 2px;
-  width: 64px;
-  height: 44px;
-  background: #07090e;
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 4px;
-  transition: all 0.22s ease;
+  border-left: 1px solid rgba(255, 255, 255, 0.1);
+  background: transparent;
+}
+
+.chamber-bay:first-child {
+  border-left: none;
 }
 
 .bay-id {
-  font-size: 12px;
-  font-weight: 700;
+  font-size: 11px;
+  font-weight: 800;
   color: #64748b;
+  font-variant-numeric: tabular-nums;
 }
 
 .bay-state {
   font-size: 8px;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.06em;
   color: #475569;
 }
 
 .chamber-bay.active {
-  background: rgba(245, 158, 11, 0.08);
-  border-color: #f59e0b;
-  box-shadow: 0 0 12px rgba(245, 158, 11, 0.25);
-  transform: translateY(-2px);
+  background: #f59e0b;
+  color: #030508;
 }
 
-.chamber-bay.active .bay-id {
-  color: #fbbf24;
-}
-
+.chamber-bay.active .bay-id,
 .chamber-bay.active .bay-state {
-  color: #fbbf24;
-  font-weight: 700;
+  color: #030508;
+  font-weight: 900;
 }
 
 .chamber-bay.checked {
-  background: #040508;
-  border-color: rgba(255, 255, 255, 0.03);
-  opacity: 0.4;
+  opacity: 0.35;
 }
 
 .chamber-bay.checked .bay-id {
   text-decoration: line-through;
-  color: #334155;
 }
 
 .chamber-bay.checked .bay-state {
   color: #22c55e;
 }
 
-/* Tactile Action Switches */
-.hud-actions {
-  display: flex;
-  gap: 14px;
-  width: 100%;
-  justify-content: center;
+/* Brutalist Invert-On-Hover Action Triggers */
+.hud-action-strip {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
 }
 
-.btn-action {
-  position: relative;
+.btn-brutalist-action {
+  background: transparent;
+  border: none;
+  padding: 14px 18px;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  padding: 12px 24px;
-  border-radius: 5px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3px;
   font-family: inherit;
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.1em;
+  color: #f8fafc;
   cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-  min-width: 160px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  transition: background 0.12s ease, color 0.12s ease;
 }
 
-.btn-execute {
-  background: linear-gradient(180deg, #261214 0%, #15090a 100%);
-  border: 1px solid #7f1d1d;
-  color: #fecaca;
+.btn-brutalist-action.btn-execute {
+  border-right: 1px solid rgba(255, 255, 255, 0.16);
 }
 
-.btn-execute:hover:not(:disabled) {
-  background: linear-gradient(180deg, #3d1418 0%, #20080a 100%);
-  border-color: #ef4444;
-  color: #ffffff;
-  box-shadow: 0 0 20px rgba(239, 68, 68, 0.35);
-  transform: translateY(-2px);
+.btn-brutalist-action .action-label {
+  font-size: 13px;
+  font-weight: 900;
+  letter-spacing: 0.12em;
 }
 
-.btn-cycle {
-  background: linear-gradient(180deg, #1a2333 0%, #0d121c 100%);
-  border: 1px solid #334155;
-  color: #e2e8f0;
+.btn-brutalist-action .action-sub {
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  color: #64748b;
+  font-weight: 700;
 }
 
-.btn-cycle:hover:not(:disabled) {
-  background: linear-gradient(180deg, #24334a 0%, #111a29 100%);
-  border-color: #38bdf8;
-  color: #38bdf8;
-  box-shadow: 0 0 18px rgba(56, 189, 248, 0.3);
-  transform: translateY(-2px);
+.btn-brutalist-action.btn-execute:hover:not(:disabled) {
+  background: #ef4444;
+  color: #030508;
 }
 
-.btn-action:active:not(:disabled) {
-  transform: translateY(2px);
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.8);
+.btn-brutalist-action.btn-execute:hover:not(:disabled) .action-sub {
+  color: #030508;
 }
 
-.btn-action:disabled {
-  opacity: 0.35;
+.btn-brutalist-action.btn-cycle:hover:not(:disabled) {
+  background: #f8fafc;
+  color: #030508;
+}
+
+.btn-brutalist-action.btn-cycle:hover:not(:disabled) .action-sub {
+  color: #030508;
+}
+
+.btn-brutalist-action:disabled {
+  opacity: 0.3;
   cursor: not-allowed;
-  box-shadow: none;
-  transform: none;
-}
-
-.action-icon {
-  font-size: 14px;
 }
 
 /* ==========================================================================
-   4. CINEMA-GRADE DEATH & RECOVERY ANIMATIONS
+   6. CINEMA-GRADE DEATH & RECOVERY ANIMATIONS
    ========================================================================== */
 
 /* Analog CRT Raster Collapse Overlay */
@@ -798,9 +833,8 @@ html, body {
 }
 
 .grub-prompt {
-  background: rgba(14, 18, 26, 0.75);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 6px;
+  background: #05070a;
+  border: 1px solid rgba(255, 255, 255, 0.18);
   padding: 20px;
   display: flex;
   flex-direction: column;
@@ -836,34 +870,34 @@ html, body {
 }
 
 .btn-diegetic {
-  background: #141b24;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 4px;
-  color: #e2e8f0;
-  padding: 8px 18px;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: #f8fafc;
+  padding: 10px 20px;
   font-family: inherit;
   font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
+  font-weight: 800;
+  letter-spacing: 0.1em;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.15s ease;
 }
 
 .btn-diegetic:hover {
-  background: #1e293b;
-  border-color: #38bdf8;
-  color: #38bdf8;
+  background: #f8fafc;
+  border-color: #f8fafc;
+  color: #030508;
 }
 
 .btn-diegetic.primary {
-  background: #1e293b;
-  border-color: #38bdf8;
-  color: #38bdf8;
+  background: #f8fafc;
+  border-color: #f8fafc;
+  color: #030508;
 }
 
 .btn-diegetic.primary:hover {
-  background: #253347;
-  color: #ffffff;
+  background: #22c55e;
+  border-color: #22c55e;
+  color: #030508;
 }
 
 .hint {
@@ -935,7 +969,7 @@ html, body {
   margin-top: 32px;
 }
 
-/* Diegetic Victory Telemetry Card */
+/* Brutalist Victory Telemetry Card */
 .telemetry-victory-screen {
   position: absolute;
   top: 0;
@@ -943,20 +977,18 @@ html, body {
   width: 100%;
   height: 100%;
   z-index: 65;
-  background: rgba(2, 4, 8, 0.88);
-  backdrop-filter: blur(8px);
+  background: rgba(3, 5, 8, 0.88);
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .telemetry-panel {
-  width: 560px;
+  width: 540px;
   max-width: 90vw;
-  background: linear-gradient(180deg, rgba(17, 24, 34, 0.95) 0%, rgba(9, 13, 20, 0.98) 100%);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 8px;
-  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.85), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  background: #030508;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-left: 4px solid #22c55e;
   padding: 28px;
   display: flex;
   flex-direction: column;
@@ -964,7 +996,7 @@ html, body {
 }
 
 .telemetry-panel.danger {
-  border-color: #ef4444;
+  border-left-color: #ef4444;
 }
 
 .panel-header {
@@ -972,21 +1004,20 @@ html, body {
   align-items: center;
   gap: 10px;
   font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.12em;
+  font-weight: 800;
+  letter-spacing: 0.14em;
   color: #94a3b8;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.14);
   padding-bottom: 12px;
 }
 
 .status-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
+  width: 6px;
+  height: 6px;
 }
 
-.status-dot.green { background: #22c55e; box-shadow: 0 0 8px #22c55e; }
-.status-dot.red { background: #ef4444; box-shadow: 0 0 8px #ef4444; }
+.status-dot.green { background: #22c55e; }
+.status-dot.red { background: #ef4444; }
 
 .panel-body {
   display: flex;
@@ -996,8 +1027,9 @@ html, body {
 
 .panel-body h2 {
   font-size: 22px;
-  letter-spacing: 0.04em;
-  color: #22c55e;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  color: #f8fafc;
 }
 
 .telemetry-panel.danger .panel-body h2 {
@@ -1011,7 +1043,8 @@ html, body {
 }
 
 .stats-line {
-  font-size: 12px;
+  font-size: 11px;
+  letter-spacing: 0.08em;
   color: #64748b;
 }
 

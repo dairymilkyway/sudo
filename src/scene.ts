@@ -21,6 +21,8 @@ export interface SceneContext {
   animatePlayerAction: () => Promise<void>;
   retractPlayerArm: () => Promise<void>;
   configureScene: (playerOS: 'linux' | 'windows') => void;
+  setMenuCameraMode: (inMenu: boolean, durationMs?: number) => Promise<void>;
+  setOpponentSpeaking: (speaking: boolean) => void;
 }
 
 export function createScene(container: HTMLElement): SceneContext {
@@ -1835,8 +1837,40 @@ export function createScene(container: HTMLElement): SceneContext {
   }
 
   let isOpponentDead = false;
+  let isOpponentSpeaking = false;
   let lastBlink = 0;
   let currentOpponentOS: 'windows' | 'linux' = 'windows';
+
+  // Menu Camera Framing: Places the 3D desk, Arbiter, and Opponent cleanly in the right two-thirds
+  const menuCamPos = new THREE.Vector3(-0.62, 1.54, 1.18);
+  const menuCamLook = new THREE.Vector3(-0.34, 1.18, -0.65);
+  let menuCameraProgress = 1; // Starts in menu mode
+
+  function setOpponentSpeaking(speaking: boolean) {
+    isOpponentSpeaking = speaking;
+  }
+
+  async function setMenuCameraMode(inMenu: boolean, durationMs = 1000): Promise<void> {
+    const startVal = menuCameraProgress;
+    const endVal = inMenu ? 1 : 0;
+    if (durationMs <= 0) {
+      menuCameraProgress = endVal;
+      return;
+    }
+    const startTime = performance.now();
+    return new Promise(resolve => {
+      function step() {
+        const elapsed = performance.now() - startTime;
+        const p = Math.min(1, elapsed / durationMs);
+        // Smooth cubic ease-in-out
+        const ease = p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2;
+        menuCameraProgress = startVal + (endVal - startVal) * ease;
+        if (p < 1) requestAnimationFrame(step);
+        else resolve();
+      }
+      step();
+    });
+  }
 
   function setOpponentDefeated(defeated: boolean, botOS: 'windows' | 'linux' = currentOpponentOS) {
     isOpponentDead = defeated;
@@ -1896,11 +1930,15 @@ export function createScene(container: HTMLElement): SceneContext {
   }
 
   function update(time: number) {
-    // Subtle idle sway for camera
-    const swayX = Math.sin(time * 0.0008) * 0.02;
-    const swayY = Math.cos(time * 0.0011) * 0.015;
+    // Hide first-person arm while camera is in angled menu view
+    playerArmRig.visible = menuCameraProgress < 0.35;
 
-    // Opponent animations (blinking, breathing, subtle head tilt)
+    // Subtle idle sway for camera (wider, moodier drift in menu mode)
+    const swayMult = 1 + menuCameraProgress * 1.6;
+    const swayX = Math.sin(time * 0.0007) * 0.02 * swayMult;
+    const swayY = Math.cos(time * 0.0010) * 0.015 * swayMult;
+
+    // Opponent animations (blinking, breathing, speaking nod)
     if (!isOpponentDead) {
       const blinkCycle = time % 3800;
       const isBlinking = blinkCycle < 150;
@@ -1910,10 +1948,20 @@ export function createScene(container: HTMLElement): SceneContext {
       }
       lastBlink = blinkCycle;
 
-      torsoMesh.position.y = 0.32 + Math.sin(time * 0.002) * 0.004;
-      headGroup.position.y = 0.88 + Math.sin(time * 0.002) * 0.006;
-      headGroup.rotation.y = Math.sin(time * 0.0008) * 0.03;
-      headGroup.rotation.x = Math.sin(time * 0.0012) * 0.015;
+      if (isOpponentSpeaking) {
+        // Active speaking head & torso cadence
+        torsoMesh.position.y = 0.32 + Math.abs(Math.sin(time * 0.018)) * 0.014;
+        headGroup.position.y = 0.88 + Math.abs(Math.sin(time * 0.022)) * 0.018;
+        headGroup.rotation.x = Math.sin(time * 0.026) * 0.065 - 0.02;
+        headGroup.rotation.z = Math.cos(time * 0.019) * 0.045;
+        headGroup.rotation.y = Math.sin(time * 0.012) * 0.05;
+      } else {
+        torsoMesh.position.y = 0.32 + Math.sin(time * 0.002) * 0.004;
+        headGroup.position.y = 0.88 + Math.sin(time * 0.002) * 0.006;
+        headGroup.rotation.y = Math.sin(time * 0.0008) * 0.03;
+        headGroup.rotation.x = Math.sin(time * 0.0012) * 0.015;
+        headGroup.rotation.z = 0;
+      }
     }
 
     // Push in towards center/opponent
@@ -1929,9 +1977,12 @@ export function createScene(container: HTMLElement): SceneContext {
       shakeIntensity *= 0.88;
     }
 
-    // Interpolate camera position and lookAt between default view and console zoom
-    const curPos = new THREE.Vector3().lerpVectors(baseCamPos, zoomCamPos, consoleZoomProgress);
-    const curLook = new THREE.Vector3().lerpVectors(baseCamLook, zoomCamLook, consoleZoomProgress);
+    // Interpolate camera position and lookAt: Menu View <-> Seated View <-> Console Zoom
+    const gameplayPos = new THREE.Vector3().lerpVectors(baseCamPos, zoomCamPos, consoleZoomProgress);
+    const gameplayLook = new THREE.Vector3().lerpVectors(baseCamLook, zoomCamLook, consoleZoomProgress);
+
+    const curPos = new THREE.Vector3().lerpVectors(gameplayPos, menuCamPos, menuCameraProgress);
+    const curLook = new THREE.Vector3().lerpVectors(gameplayLook, menuCamLook, menuCameraProgress);
 
     camera.position.set(
       curPos.x + swayX + shakeX,
@@ -1974,7 +2025,9 @@ export function createScene(container: HTMLElement): SceneContext {
     zoomConsole,
     animatePlayerAction,
     retractPlayerArm,
-    configureScene
+    configureScene,
+    setMenuCameraMode,
+    setOpponentSpeaking
   };
 }
 

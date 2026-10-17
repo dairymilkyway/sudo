@@ -320,4 +320,66 @@ export class SoundFX {
     osc.start();
     osc.stop(ctx.currentTime + 0.015);
   }
+
+  // Synthesized gravelly speech blip for opponent trash talk (Buckshot / Inscryption style)
+  public playVoiceBlip(botOS: 'windows' | 'linux' = 'windows'): void {
+    const ctx = this.getContext();
+    if (!ctx) return;
+
+    const baseFreq = botOS === 'windows' ? 92 : 128; // Deeper corporate baritone vs raspy hacker synth
+    const freq = baseFreq + (Math.random() - 0.5) * 28;
+
+    const osc = ctx.createOscillator();
+    const filter = ctx.createBiquadFilter();
+    const gain = ctx.createGain();
+
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(freq, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(freq * 0.85, ctx.currentTime + 0.045);
+
+    filter.type = 'lowpass';
+    filter.frequency.setValueAtTime(580, ctx.currentTime);
+
+    gain.gain.setValueAtTime(0.09, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.045);
+
+    osc.connect(filter);
+    filter.connect(gain);
+    gain.connect(ctx.destination);
+
+    osc.start();
+    osc.stop(ctx.currentTime + 0.045);
+  }
+
+  // Classic PC speaker POST beep
+  public playBootBeep(freq = 900, duration = 0.09): void {
+    const ctx = this.getContext();
+    if (!ctx) return;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'square';
+    osc.frequency.setValueAtTime(freq, ctx.currentTime);
+    gain.gain.setValueAtTime(0.08, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + duration);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start();
+    osc.stop(ctx.currentTime + duration);
+  }
+
+  // Hard drive seek / memory tick for loading screens
+  public playDiskSeek(): void {
+    const ctx = this.getContext();
+    if (!ctx) return;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'square';
+    osc.frequency.setValueAtTime(1200 + Math.random() * 1400, ctx.currentTime);
+    gain.gain.setValueAtTime(0.03, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.012);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start();
+    osc.stop(ctx.currentTime + 0.012);
+  }
 }
